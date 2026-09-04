@@ -6,15 +6,31 @@
     <title>dBTechnologies Audio & Rigging Designer - By Santoro Carlo</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body { background-color: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-card { border: 1px solid #ccc !important; background-color: #f9f9f9 !important; color: black !important; }
+            .text-amber-500, .text-amber-400 { color: #d97706 !important; }
+            .bg-slate-800, .bg-slate-900, .bg-slate-900\/60, .bg-slate-900\/80 { background-color: #fff !important; color: #000 !important; border: 1px solid #ddd !important; }
+            .text-white, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400 { color: #111 !important; }
+        }
+    </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
 
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <header class="mb-8 border-b border-slate-800 pb-4">
-            <h1 class="text-2xl md:text-3xl font-bold text-amber-500">dBTechnologies Audio & Rigging Designer</h1>
-            <p class="text-slate-300 font-semibold text-base mt-1">By Santoro Carlo</p>
-            <p class="text-slate-400 text-xs mt-1">Dimensionamento dinamico basato sul magazzino VIO e parametri completi venue</p>
+        <header class="mb-8 border-b border-slate-800 pb-4 flex justify-between items-start">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-amber-500">dBTechnologies Audio & Rigging Designer</h1>
+                <p class="text-slate-300 font-semibold text-base mt-1">By Santoro Carlo</p>
+                <p class="text-slate-400 text-xs mt-1">Dimensionamento dinamico basato sul magazzino VIO e parametri completi venue</p>
+            </div>
+            <button onclick="window.print()" class="no-print bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-5 rounded-lg shadow-lg flex items-center gap-2 transition-all cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Esporta PDF / Stampa Scheda
+            </button>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -194,6 +210,39 @@
                         <div id="resMonitorsAdvice" class="text-xs text-slate-400 mt-1">2 usati per Frontfill | 2 per Spie</div>
                     </div>
 
+                    <!-- RIEPILOGO FINALE MATERIALE DA CARICARE (PICKUP LIST) -->
+                    <div class="mb-6 bg-amber-500/10 p-5 rounded-xl border-2 border-amber-500/60 space-y-3 print-card">
+                        <div class="flex justify-between items-center border-b border-amber-500/40 pb-2">
+                            <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                                📋 RIEPILOGO LISTA MATERIALE (PICKUP LIST)
+                            </h3>
+                            <span class="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-mono" id="resSummaryWeightTotal">0 kg tot</span>
+                        </div>
+                        
+                        <div class="space-y-1.5 text-xs text-slate-200 font-mono">
+                            <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                                <span>• Moduli Main Array dB VIO L208:</span>
+                                <strong id="summaryL208Count" class="text-amber-400 text-sm">12 pz</strong>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                                <span>• Flybar / Telai DRK-210:</span>
+                                <strong id="summaryFlybarCount" class="text-amber-400 text-sm">2 pz</strong>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                                <span>• Subwoofer dB VIO S118R:</span>
+                                <strong id="summarySubCount" class="text-amber-400 text-sm">4 pz</strong>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                                <span>• Frontfill / Diffusori dB VIO X10:</span>
+                                <strong id="summaryX10Count" class="text-amber-400 text-sm">2 pz</strong>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                                <span>• Spie Palco Rimanenti dB VIO X10:</span>
+                                <strong id="summaryStageMonCount" class="text-amber-400 text-sm">2 pz</strong>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Indicatore Disponibilità / ALERT MAGGIORE -->
                     <div id="stockStatus" class="p-4 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-emerald-400 text-sm font-semibold space-y-1">
                         ✓ Quantità del tuo magazzino VIO sufficienti per coprire l'evento.
@@ -253,6 +302,14 @@
         const resHeightCheck = document.getElementById('resHeightCheck');
         const stockStatus = document.getElementById('stockStatus');
 
+        // DOM Elements Summary
+        const summaryL208Count = document.getElementById('summaryL208Count');
+        const summaryFlybarCount = document.getElementById('summaryFlybarCount');
+        const summarySubCount = document.getElementById('summarySubCount');
+        const summaryX10Count = document.getElementById('summaryX10Count');
+        const summaryStageMonCount = document.getElementById('summaryStageMonCount');
+        const resSummaryWeightTotal = document.getElementById('resSummaryWeightTotal');
+
         function calculateSystem() {
             const depth = parseFloat(venueDepth.value) || 10;
             const width = parseFloat(venueWidth.value) || 10;
@@ -306,7 +363,7 @@
             const usagePercentage = Math.min(100, Math.round((totalModules / Math.max(1, maxL208)) * 100));
             resArrayProgressBar.style.width = `${usagePercentage}%`;
 
-            // 4. Verifiche Carenze Magazzino e Gestione Alert
+            // 4. Verifiche Carenze Magazzino
             const missingL208 = totalModules - maxL208;
             const missingS118R = totalSubs - maxS118R;
 
@@ -394,6 +451,21 @@
             }
 
             resHeadroom.textContent = `SPL Max teorico al FOH (${depth}m): ~${Math.round(splAtDistance)} dB`;
+
+            // 7. RIEPILOGO FINALE MATERIALE (PICKUP LIST & WEIGHTS)
+            summaryL208Count.textContent = `${totalModules} pz`;
+            summaryFlybarCount.textContent = `2 pz (DRK-210)`;
+            summarySubCount.textContent = `${totalSubs} pz`;
+            summaryX10Count.textContent = `${frontfillCount} pz`;
+            summaryStageMonCount.textContent = `${remainingMonitors} pz`;
+
+            // Calcolo peso totale materiale in furgone
+            const totalTruckWeight = (totalModules * SPECS.l208.weight) + 
+                                     (2 * SPECS.l208.flybarWeight) + 
+                                     (totalSubs * SPECS.s118r.weight) + 
+                                     (maxX10 * SPECS.x10.weight);
+
+            resSummaryWeightTotal.textContent = `Peso carico: ~${Math.round(totalTruckWeight)} kg`;
         }
 
         // Listeners
