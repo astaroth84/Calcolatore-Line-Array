@@ -3,28 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Line Array System Sizer & Rigging Weight</title>
-    <!-- Tailwind CSS CDN per lo styling grafico -->
+    <title>dBTechnologies VIO System Sizer</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
 
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <header class="mb-8 border-b border-slate-800 pb-4">
-            <h1 class="text-2xl md:text-3xl font-bold text-amber-500">Audio System & Rigging Designer</h1>
-            <p class="text-slate-400 text-sm">Dimensionamento rapido impianto, verifica magazzino e calcolo carichi sospesi</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-amber-500">dBTechnologies Audio & Rigging Designer</h1>
+            <p class="text-slate-400 text-sm">Dimensionamento dinamico basato sul magazzino VIO L208 & VIO S118R</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <!-- SEZIONE FORM / INPUT (Left Column) -->
             <div class="lg:col-span-7 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl space-y-6">
-                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2">1. Parametri Venue & Evento</h2>
+                
+                <!-- INVENTARIO MAGAZZINO SELEZIONATO -->
+                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2">1. Hardware in Magazzino</h2>
+                
+                <div class="grid grid-cols-3 gap-3 bg-slate-900/80 p-4 rounded-lg border border-slate-700/50 text-xs">
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Line Array Main:</span>
+                        <span class="text-sm font-bold text-amber-400">dB VIO L208</span>
+                        <span class="text-slate-400 block mt-1">Disponibili: <strong>18 moduli</strong></span>
+                        <span class="text-slate-500 block">(18.1 kg / 133.5 dB SPL)</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Subwoofer:</span>
+                        <span class="text-sm font-bold text-amber-400">dB VIO S118R</span>
+                        <span class="text-slate-400 block mt-1">Disponibili: <strong>4 unità</strong></span>
+                        <span class="text-slate-500 block">(47 kg / 139 dB SPL)</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold">Stage Monitor / Fill:</span>
+                        <span class="text-sm font-bold text-amber-400">dB VIO X10</span>
+                        <span class="text-slate-400 block mt-1">Disponibili: <strong>4 spie</strong></span>
+                        <span class="text-slate-500 block">(13.6 kg / 130 dB SPL)</span>
+                    </div>
+                </div>
+
+                <!-- PARAMETRI EVENTO -->
+                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 pt-2">2. Parametri Venue & Evento</h2>
 
                 <!-- Tipo Evento / Target SPL -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Tipologia Evento / Target SPL</label>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Tipologia Evento / Target SPL al FOH</label>
                     <select id="eventType" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                         <option value="95">Conferenza / Acustico (~95 dBA)</option>
                         <option value="102" selected>Pop / Rock Live (~102 dBA)</option>
@@ -32,39 +58,30 @@
                     </select>
                 </div>
 
-                <!-- Profondità Venue (Slider + Number) -->
+                <!-- Profondità Venue -->
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label class="text-sm font-medium text-slate-300">Profondità Area d'Ascolto (m)</label>
-                        <span id="depthValue" class="text-amber-500 font-bold text-lg">35 m</span>
+                        <span id="depthValue" class="text-amber-500 font-bold text-lg">30 m</span>
                     </div>
-                    <input type="range" id="depthRange" min="10" max="80" value="35" class="w-full accent-amber-500 bg-slate-900 rounded-lg h-2 cursor-pointer">
+                    <input type="range" id="depthRange" min="10" max="60" value="30" class="w-full accent-amber-500 bg-slate-900 rounded-lg h-2 cursor-pointer">
                 </div>
 
-                <!-- Stima Pubblico -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Numero Persone Stimato</label>
-                    <input type="number" id="peopleCount" value="1500" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                </div>
-
-                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 pt-4">2. Magazzino & Specifiche Rigging</h2>
+                <!-- MODIFICA TEMPORANEA DISPONIBILITÀ (Es. Cantiere o Materiale già impegnato) -->
+                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 pt-2">3. Disponibilità Effettiva Evento</h2>
                 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Max Moduli Array Disponibili</label>
-                        <input type="number" id="stockArray" value="16" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        <label class="block text-xs text-slate-400 mb-1">Moduli L208 Pronti</label>
+                        <input type="number" id="stockArray" value="18" max="18" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Max Sub Disponibili</label>
-                        <input type="number" id="stockSub" value="12" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        <label class="block text-xs text-slate-400 mb-1">Sub S118R Pronti</label>
+                        <input type="number" id="stockSub" value="4" max="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Peso Singolo Modulo (kg)</label>
-                        <input type="number" id="moduleWeight" value="25" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Peso Flybar / Telaio (kg)</label>
-                        <input type="number" id="flybarWeight" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        <label class="block text-xs text-slate-400 mb-1">VIO X10 Pronti</label>
+                        <input type="number" id="stockMonitors" value="4" max="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
                     </div>
                 </div>
             </div>
@@ -72,50 +89,58 @@
             <!-- SEZIONE RISULTATI (Right Column) -->
             <div class="lg:col-span-5 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between space-y-6">
                 <div>
-                    <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 mb-6">3. Configurazione & Rigging</h2>
+                    <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 mb-6">4. Scheda di Calcolo e Rigging</h2>
 
-                    <!-- Main Array -->
+                    <!-- Main Array VIO L208 -->
                     <div class="mb-4 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Main Array (per lato)</div>
+                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Main Array: dB VIO L208 (per lato)</div>
                         <div id="resArrayPerSide" class="text-3xl font-extrabold text-amber-500">0 moduli</div>
-                        <div id="resArrayTotal" class="text-sm text-slate-400 mt-1">Totale usati: 0</div>
+                        <div id="resArrayTotal" class="text-sm text-slate-400 mt-1">Totale usati: 0 su 18</div>
+                        <div id="resHeadroom" class="text-xs text-emerald-400 mt-2">SPL Max teorico al FOH: -- dB</div>
                     </div>
 
-                    <!-- Rigging / Weight Details -->
+                    <!-- Rigging / Weight Details VIO L208 -->
                     <div class="mb-4 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50 space-y-2">
-                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Analisi Carico Sospeso (per lato)</div>
+                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Analisi Carico Sospeso DRK-210 (per lato)</div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-slate-300">Peso Cluster Moduli:</span>
+                            <span class="text-sm text-slate-300">Peso Moduli VIO L208:</span>
                             <span id="resClusterWeight" class="text-sm font-semibold text-slate-100">0 kg</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-slate-300">Peso Flybar:</span>
-                            <span id="resFlybarWeightDisplay" class="text-sm font-semibold text-slate-100">0 kg</span>
+                            <span class="text-sm text-slate-300">Peso Flybar DRK-210:</span>
+                            <span class="text-sm font-semibold text-slate-100">17 kg</span>
                         </div>
                         <div class="border-t border-slate-700 pt-2 flex justify-between items-center">
                             <span class="text-sm font-bold text-white">Carico Totale Sospeso:</span>
                             <span id="resTotalWeight" class="text-2xl font-bold text-amber-500">0 kg</span>
                         </div>
                         <div class="text-xs text-amber-400/90 pt-1" id="resMotorAdvice">
-                            Motore minimo cons.: 250 kg WLL
+                            Sospensione consigliata: Motore min. 250 kg WLL
                         </div>
                     </div>
 
-                    <!-- Subwoofer -->
-                    <div class="mb-6 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Subwoofer (totali)</div>
+                    <!-- Subwoofer VIO S118R -->
+                    <div class="mb-4 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Subwoofer: dB VIO S118R</div>
                         <div id="resSubTotal" class="text-3xl font-extrabold text-amber-500">0 sub</div>
-                        <div class="text-sm text-slate-400 mt-1">Configurazione consigliata: Cardioide a terra</div>
+                        <div id="resSubConfig" class="text-sm text-slate-400 mt-1">Configurazione: 2x lato o Cardioide a terra</div>
+                    </div>
+
+                    <!-- Frontfill / Stage Monitor VIO X10 -->
+                    <div class="mb-6 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Frontfill / Utility: dB VIO X10</div>
+                        <div id="resMonitorsTotal" class="text-xl font-bold text-slate-200">2x Frontfill</div>
+                        <div class="text-xs text-slate-400 mt-1">2 usati come Frontfill / 2 disponibili per Monitored</div>
                     </div>
 
                     <!-- Indicatore Disponibilità / Alert -->
                     <div id="stockStatus" class="p-4 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-emerald-400 text-sm">
-                        ✓ Quantità disponibili in magazzino sufficienti.
+                        ✓ Materiale in magazzino sufficiente.
                     </div>
                 </div>
 
                 <div class="pt-4 border-t border-slate-700 text-xs text-slate-500 text-center">
-                    Verificare sempre la portata delle strutture (WLL) e il punto di sospensione con calcoli di carico statico/dinamico ufficiali prima del montaggio.
+                    Verificare la direttività e gli angoli di splay con Aurora Net o software di puntamento dedicato.
                 </div>
             </div>
 
@@ -124,21 +149,28 @@
 
     <!-- LOGICA DI CALCOLO IN JAVASCRIPT -->
     <script>
-        // Elementi DOM
+        // Specifiche Hardware VIO
+        const SPECS = {
+            l208: { weight: 18.1, maxSPL: 133.5, flybarWeight: 17 },
+            s118r: { weight: 47.0, maxSPL: 139 },
+            x10: { weight: 13.6, maxSPL: 130 }
+        };
+
+        // DOM Elements
         const depthRange = document.getElementById('depthRange');
         const depthValue = document.getElementById('depthValue');
         const eventType = document.getElementById('eventType');
-        const peopleCount = document.getElementById('peopleCount');
         const stockArray = document.getElementById('stockArray');
         const stockSub = document.getElementById('stockSub');
-        const moduleWeight = document.getElementById('moduleWeight');
-        const flybarWeight = document.getElementById('flybarWeight');
+        const stockMonitors = document.getElementById('stockMonitors');
 
         const resArrayPerSide = document.getElementById('resArrayPerSide');
         const resArrayTotal = document.getElementById('resArrayTotal');
         const resSubTotal = document.getElementById('resSubTotal');
+        const resSubConfig = document.getElementById('resSubConfig');
+        const resMonitorsTotal = document.getElementById('resMonitorsTotal');
+        const resHeadroom = document.getElementById('resHeadroom');
         const resClusterWeight = document.getElementById('resClusterWeight');
-        const resFlybarWeightDisplay = document.getElementById('resFlybarWeightDisplay');
         const resTotalWeight = document.getElementById('resTotalWeight');
         const resMotorAdvice = document.getElementById('resMotorAdvice');
         const stockStatus = document.getElementById('stockStatus');
@@ -146,72 +178,86 @@
         function calculateSystem() {
             const depth = parseInt(depthRange.value);
             const targetSPL = parseInt(eventType.value);
-            const maxArray = parseInt(stockArray.value) || 0;
-            const maxSub = parseInt(stockSub.value) || 0;
-            const modWeight = parseFloat(moduleWeight.value) || 0;
-            const flyWeight = parseFloat(flybarWeight.value) || 0;
+            const maxL208 = parseInt(stockArray.value) || 0;
+            const maxS118R = parseInt(stockSub.value) || 0;
+            const maxX10 = parseInt(stockMonitors.value) || 0;
 
             depthValue.textContent = `${depth} m`;
 
-            // Algoritmo di dimensionamento cluster
-            let modulesPerSide = 3;
-            if (depth > 20 && depth <= 30) modulesPerSide = 4;
-            else if (depth > 30 && depth <= 45) modulesPerSide = 6;
-            else if (depth > 45 && depth <= 60) modulesPerSide = 8;
-            else if (depth > 60) modulesPerSide = 10;
+            // Algoritmo di dimensionamento ottimizzato per VIO L208 (2x8")
+            let baseModules = 3;
+            if (depth <= 18) baseModules = 3;
+            else if (depth > 18 && depth <= 28) baseModules = 4;
+            else if (depth > 28 && depth <= 38) baseModules = 6;
+            else if (depth > 38 && depth <= 48) baseModules = 8;
+            else if (depth > 48) baseModules = 9; // Max 9 per lato con i tuoi 18 moduli
 
-            if (targetSPL >= 106 && depth > 25) {
-                modulesPerSide += 2;
+            // Aumento per SPL elevato se la distanza lo richiede
+            if (targetSPL >= 106 && depth > 20 && baseModules < 9) {
+                baseModules = Math.min(9, baseModules + 1);
             }
 
+            const modulesPerSide = baseModules;
             const totalModules = modulesPerSide * 2;
-            
-            // Subwoofer
-            let totalSubs = Math.ceil(totalModules * 0.75);
-            if (totalSubs % 2 !== 0) totalSubs += 1;
 
-            // Calcolo Pesi Rigging
-            const clusterWeight = modulesPerSide * modWeight;
-            const totalWeightPerSide = clusterWeight + flyWeight;
-
-            // Suggerimento Taglia Motore (WLL con margine indicativo)
-            let motorSize = "250 kg WLL";
-            if (totalWeightPerSide > 200 && totalWeightPerSide <= 450) {
-                motorSize = "500 kg WLL";
-            } else if (totalWeightPerSide > 450) {
-                motorSize = "1000 kg (1 Ton) WLL";
+            // Subwoofer S118R
+            let totalSubs = 2;
+            if (depth > 22 || targetSPL >= 102) {
+                totalSubs = 4;
             }
+
+            // Sub Config Advice
+            let subText = "2x per lato L/R";
+            if (totalSubs === 4) {
+                subText = "4x totali (es. Linea di Sub o Cardioide 3+1)";
+            }
+
+            // Frontfill VIO X10 Advice
+            let frontfillCount = 2;
+            if (depth <= 15) frontfillCount = 0; // Con cluster vicini non servono frontfill
+            else if (maxX10 < 2) frontfillCount = maxX10;
+
+            // Calcolo Carichi Sospesi DRK-210 + L208
+            const clusterWeight = modulesPerSide * SPECS.l208.weight;
+            const totalWeightPerSide = clusterWeight + SPECS.l208.flybarWeight;
+
+            // Motore consigliato
+            let motorSize = "250 kg WLL";
+            if (totalWeightPerSide > 200) motorSize = "500 kg WLL";
+
+            // Stima SPL al FOH
+            const splAtDistance = (SPECS.l208.maxSPL + (3 * Math.log2(modulesPerSide))) - (10 * Math.log10(depth));
 
             // Rendering dei Risultati
             resArrayPerSide.textContent = `${modulesPerSide} moduli`;
-            resArrayTotal.textContent = `Totale usati: ${totalModules} su ${maxArray} disponibili`;
+            resArrayTotal.textContent = `Totale usati: ${totalModules} su ${maxL208} disponibili`;
             resSubTotal.textContent = `${totalSubs} sub`;
+            resSubConfig.textContent = `Configurazione consigliata: ${subText}`;
+            resMonitorsTotal.textContent = `${frontfillCount}x VIO X10 per Frontfill`;
 
-            resClusterWeight.textContent = `${clusterWeight} kg`;
-            resFlybarWeightDisplay.textContent = `${flyWeight} kg`;
-            resTotalWeight.textContent = `${totalWeightPerSide} kg`;
-            resMotorAdvice.textContent = `Punto di sospensione consigliato: Motore min. ${motorSize}`;
+            resClusterWeight.textContent = `${clusterWeight.toFixed(1)} kg`;
+            resTotalWeight.textContent = `${totalWeightPerSide.toFixed(1)} kg`;
+            resMotorAdvice.textContent = `Sospensione consigliata: Motore min. ${motorSize}`;
+            resHeadroom.textContent = `SPL Max teorico al FOH (${depth}m): ~${Math.round(splAtDistance)} dB`;
 
-            // Verifica Fattibilità Magazzino
-            if (totalModules > maxArray || totalSubs > maxSub) {
+            // Verifiche Magazzino
+            if (totalModules > maxL208 || totalSubs > maxS118R) {
                 stockStatus.className = "p-4 rounded-lg bg-red-950/50 border border-red-600/30 text-red-400 text-sm";
-                stockStatus.textContent = "⚠ ATTENZIONE: La configurazione supera la disponibilità a magazzino!";
+                stockStatus.textContent = "⚠ ATTENZIONE: Il calcolo teorico supera le unità VIO attualmente impostate come disponibili!";
             } else {
                 stockStatus.className = "p-4 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-emerald-400 text-sm";
-                stockStatus.textContent = "✓ Quantità disponibili in magazzino sufficienti.";
+                stockStatus.textContent = "✓ Quantità del tuo magazzino VIO sufficienti per coprire l'evento.";
             }
         }
 
-        // Event Listener per aggiornare i calcoli in tempo reale
+        // Listener
         depthRange.addEventListener('input', calculateSystem);
         eventType.addEventListener('change', calculateSystem);
-        peopleCount.addEventListener('input', calculateSystem);
         stockArray.addEventListener('input', calculateSystem);
         stockSub.addEventListener('input', calculateSystem);
-        moduleWeight.addEventListener('input', calculateSystem);
-        flybarWeight.addEventListener('input', calculateSystem);
+        stockMonitors.addEventListener('input', calculateSystem);
 
-        // Calcolo iniziale
+        // Init
         calculateSystem();
     </script>
 </body>
