@@ -29,7 +29,7 @@
             </div>
             <button onclick="window.print()" class="no-print bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-5 rounded-lg shadow-lg flex items-center gap-2 transition-all cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Esporta PDF / Stampa Scheda
+                Esporta PDF / Stampa
             </button>
         </header>
 
@@ -76,7 +76,7 @@
                         <input type="number" id="venueWidth" value="20" min="5" max="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Altezza Soffitto/Americana (m)</label>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Altezza Soffitto (m)</label>
                         <input type="number" id="venueHeight" value="7" min="3" max="30" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                 </div>
@@ -144,11 +144,27 @@
                         </div>
                     </div>
 
+                    <!-- ANTEPRIMA GRAFICA 2D CANTONE/LAYOUT VENUE -->
+                    <div class="mb-4 bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 print-card">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">🎨 Anteprima Layout Venue (2D Top View)</span>
+                            <span class="text-[10px] text-slate-400">Scala dinamica</span>
+                        </div>
+                        <div class="w-full bg-slate-950 rounded-lg border border-slate-800 overflow-hidden flex justify-center p-1">
+                            <canvas id="venueCanvas" width="400" height="220" class="max-w-full"></canvas>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-slate-400 mt-2 px-1 font-mono">
+                            <span>🔴 Main Array</span>
+                            <span>🟩 Sub S118R</span>
+                            <span>🔵 Frontfill</span>
+                            <span>🟨 Pubblico</span>
+                        </div>
+                    </div>
+
                     <!-- Main Array VIO L208 -->
                     <div id="arrayCardBox" class="mb-4 bg-amber-500/10 p-5 rounded-xl border-2 border-amber-500/50 relative overflow-hidden transition-all duration-300">
                         <div class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Main Array: dB VIO L208</div>
                         
-                        <!-- Box Totale Moduli Impianto -->
                         <div class="flex items-baseline justify-between mb-3 border-b border-amber-500/30 pb-3">
                             <div>
                                 <span class="text-xs text-slate-300 block">FABBISOGNO TEORICO</span>
@@ -162,7 +178,6 @@
                             </div>
                         </div>
 
-                        <!-- Progress Bar Impegno Magazzino -->
                         <div class="w-full bg-slate-900/80 rounded-full h-2.5 overflow-hidden mb-2">
                             <div id="resArrayProgressBar" class="bg-amber-500 h-2.5 rounded-full transition-all duration-300" style="width: 66%"></div>
                         </div>
@@ -210,7 +225,7 @@
                         <div id="resMonitorsAdvice" class="text-xs text-slate-400 mt-1">2 usati per Frontfill | 2 per Spie</div>
                     </div>
 
-                    <!-- RIEPILOGO FINALE MATERIALE DA CARICARE (PICKUP LIST) -->
+                    <!-- RIEPILOGO FINALE MATERIALE (PICKUP LIST) -->
                     <div class="mb-6 bg-amber-500/10 p-5 rounded-xl border-2 border-amber-500/60 space-y-3 print-card">
                         <div class="flex justify-between items-center border-b border-amber-500/40 pb-2">
                             <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -257,7 +272,7 @@
         </div>
     </div>
 
-    <!-- LOGICA DI CALCOLO IN JAVASCRIPT -->
+    <!-- LOGICA DI CALCOLO E GRAFICA IN JAVASCRIPT -->
     <script>
         const SPECS = {
             l208: { weight: 18.1, maxSPL: 133.5, flybarWeight: 17, heightModule: 0.26 },
@@ -309,6 +324,102 @@
         const summaryX10Count = document.getElementById('summaryX10Count');
         const summaryStageMonCount = document.getElementById('summaryStageMonCount');
         const resSummaryWeightTotal = document.getElementById('resSummaryWeightTotal');
+
+        // FUNZIONE PER IL DISEGNO DEL LAYOUT 2D
+        function drawVenuePreview(depth, width, people, modulesPerSide, totalSubs, frontfillCount) {
+            const canvas = document.getElementById('venueCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const cw = canvas.width;
+            const ch = canvas.height;
+
+            ctx.clearRect(0, 0, cw, ch);
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, cw, ch);
+
+            const padding = 20;
+            const maxDrawWidth = cw - (padding * 2);
+            const maxDrawHeight = ch - (padding * 2);
+
+            const scaleX = maxDrawWidth / Math.max(width, 10);
+            const scaleY = maxDrawHeight / Math.max(depth, 10);
+            const scale = Math.min(scaleX, scaleY);
+
+            const drawW = width * scale;
+            const drawH = depth * scale;
+            const startX = (cw - drawW) / 2;
+            const startY = padding;
+
+            // 1. Perimetro Venue
+            ctx.strokeStyle = "#334155";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(startX, startY, drawW, drawH);
+
+            // 2. Palco
+            const stageW = Math.min(drawW * 0.7, drawW - 10);
+            const stageH = 12;
+            const stageX = startX + (drawW - stageW) / 2;
+            const stageY = startY + 2;
+
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(stageX, stageY, stageW, stageH);
+            ctx.strokeStyle = "#475569";
+            ctx.strokeRect(stageX, stageY, stageW, stageH);
+            
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "8px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("STAGE", stageX + stageW / 2, stageY + 9);
+
+            // 3. Pubblico (Punti dinamici)
+            ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
+            const dots = Math.min(Math.floor(people / 25), 60);
+            for (let i = 0; i < dots; i++) {
+                const px = startX + 5 + Math.random() * (drawW - 10);
+                const py = stageY + stageH + 10 + Math.random() * (drawH - stageH - 15);
+                ctx.beginPath();
+                ctx.arc(px, py, 1.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 4. Main Array VIO L208 (Rosso)
+            const arrW = 6;
+            const arrH = Math.min(14, 4 + modulesPerSide * 0.8);
+            ctx.fillStyle = "#ef4444";
+            ctx.fillRect(stageX - 8, stageY + 2, arrW, arrH);
+            ctx.fillRect(stageX + stageW + 2, stageY + 2, arrW, arrH);
+
+            // Lines di Copertura
+            ctx.strokeStyle = "rgba(239, 68, 68, 0.2)";
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.moveTo(stageX - 5, stageY + 5);
+            ctx.lineTo(startX, startY + drawH);
+            ctx.moveTo(stageX + stageW + 5, stageY + 5);
+            ctx.lineTo(startX + drawW, startY + drawH);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 5. Subwoofer S118R (Verdi)
+            ctx.fillStyle = "#22c55e";
+            const subW = 7;
+            const subH = 4;
+            const subSpacing = stageW / (totalSubs + 1);
+            for (let i = 1; i <= totalSubs; i++) {
+                ctx.fillRect(stageX + (subSpacing * i) - (subW / 2), stageY + stageH + 1, subW, subH);
+            }
+
+            // 6. Frontfill VIO X10 (Blu)
+            if (frontfillCount > 0) {
+                ctx.fillStyle = "#3b82f6";
+                const ffSpacing = stageW / (frontfillCount + 1);
+                for (let i = 1; i <= frontfillCount; i++) {
+                    ctx.beginPath();
+                    ctx.arc(stageX + (ffSpacing * i), stageY + stageH - 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
 
         function calculateSystem() {
             const depth = parseFloat(venueDepth.value) || 10;
@@ -395,7 +506,7 @@
             if (isArrayDeficit || isSubDeficit) {
                 stockStatus.className = "p-4 rounded-lg bg-red-950/80 border-2 border-red-600 text-red-200 text-sm space-y-2";
                 
-                let alertHTML = `<div class="font-bold text-red-400 text-base">⚠ ATTENZIONE: MATERIALE INSUFFICIENTE PER QUESTA VENUE!</div>`;
+                let alertHTML = `<div class="font-bold text-red-400 text-base">⚠ ATTENZIONE: MATERIALE INSUFFICIENTI PER QUESTA VENUE!</div>`;
                 alertHTML += `<div class="text-xs text-slate-200">Il tuo magazzino VIO non è sufficiente per garantire la copertura o la pressione acustica richiesta.</div>`;
                 alertHTML += `<div class="bg-red-900/40 p-2.5 rounded border border-red-700/50 text-xs font-mono mt-2 space-y-1">`;
                 
@@ -452,20 +563,22 @@
 
             resHeadroom.textContent = `SPL Max teorico al FOH (${depth}m): ~${Math.round(splAtDistance)} dB`;
 
-            // 7. RIEPILOGO FINALE MATERIALE (PICKUP LIST & WEIGHTS)
+            // 7. RIEPILOGO FINALE MATERIALE
             summaryL208Count.textContent = `${totalModules} pz`;
             summaryFlybarCount.textContent = `2 pz (DRK-210)`;
             summarySubCount.textContent = `${totalSubs} pz`;
             summaryX10Count.textContent = `${frontfillCount} pz`;
             summaryStageMonCount.textContent = `${remainingMonitors} pz`;
 
-            // Calcolo peso totale materiale in furgone
             const totalTruckWeight = (totalModules * SPECS.l208.weight) + 
                                      (2 * SPECS.l208.flybarWeight) + 
                                      (totalSubs * SPECS.s118r.weight) + 
                                      (maxX10 * SPECS.x10.weight);
 
             resSummaryWeightTotal.textContent = `Peso carico: ~${Math.round(totalTruckWeight)} kg`;
+
+            // 8. DISEGNA ANTEPRIMA GRAFICA 2D
+            drawVenuePreview(depth, width, people, modulesPerSide, totalSubs, frontfillCount);
         }
 
         // Listeners
