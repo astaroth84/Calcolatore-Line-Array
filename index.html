@@ -162,7 +162,7 @@
                             <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
                                 🎨 Layout Venue 2D (Clicca per Vista 3D) 🔍
                             </span>
-                            <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-slate-950 transition-all">Apri 3D</span>
+                            <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-slate-950 transition-all font-bold">Apri 3D</span>
                         </div>
                         <div class="w-full bg-slate-950 rounded-lg border border-slate-800 overflow-hidden flex justify-center p-1">
                             <canvas id="venueCanvas" width="400" height="220" class="max-w-full"></canvas>
@@ -287,22 +287,22 @@
     </div>
 
     <!-- MODAL POPUP PER VISTA 3D SCHERMO INTERO -->
-    <div id="modal3D" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col justify-between p-4 md:p-8 no-print">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+    <div id="modal3D" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col justify-between p-4 md:p-6 no-print">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
             <div>
-                <h2 class="text-xl font-bold text-amber-500">Vista Isometrica 3D - Layout Venue & Rigging</h2>
-                <p class="text-xs text-slate-400">Rappresentazione prospettica 3D dell'installazione dBTechnologies VIO</p>
+                <h2 class="text-lg md:text-xl font-bold text-amber-500">Vista Isometrica 3D - Venue & Rigging</h2>
+                <p class="text-xs text-slate-400">Rappresentazione prospettica 3D dinamica dell'installazione VIO</p>
             </div>
-            <button onclick="close3DModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg border border-slate-600 transition-all cursor-pointer">
+            <button onclick="close3DModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2 px-4 rounded-lg transition-all cursor-pointer">
                 ✕ Chiudi Vista 3D
             </button>
         </div>
 
-        <div class="flex-1 flex justify-center items-center my-4 overflow-hidden">
-            <canvas id="canvas3D" width="850" height="500" class="max-w-full max-h-full rounded-xl border border-slate-800 shadow-2xl bg-slate-950"></canvas>
+        <div class="flex-1 flex justify-center items-center my-2 overflow-hidden relative">
+            <canvas id="canvas3D" width="900" height="520" class="max-w-full max-h-full rounded-xl border border-slate-800 shadow-2xl bg-slate-950"></canvas>
         </div>
 
-        <div class="flex justify-center gap-6 text-xs text-slate-400 font-mono border-t border-slate-800 pt-3">
+        <div class="flex justify-center flex-wrap gap-4 text-xs text-slate-400 font-mono border-t border-slate-800 pt-3">
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-500 rounded-sm"></span> Main Cluster VIO L208</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-500 rounded-sm"></span> Subwoofer VIO S118R</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span> Frontfill VIO X10</span>
@@ -461,7 +461,7 @@
             }
         }
 
-        // FUNZIONE PER IL DISEGNO DELLA VISTA 3D ISOMETRICA
+        // FUNZIONE PER IL DISEGNO DELLA VISTA 3D ISOMETRICA CORRETTA
         function draw3DPreview() {
             const canvas = document.getElementById('canvas3D');
             if (!canvas) return;
@@ -475,7 +475,6 @@
             const stW = parseFloat(stageWidth.value) || 12;
             const stD = parseFloat(stageDepth.value) || 8;
 
-            const targetSPL = parseInt(eventType.value);
             let modulesPerSide = 6;
             if (depth <= 18) modulesPerSide = 3;
             else if (depth > 18 && depth <= 28) modulesPerSide = 4;
@@ -489,108 +488,126 @@
             ctx.fillStyle = "#020617";
             ctx.fillRect(0, 0, cw, ch);
 
-            // Proiezione Isometrica 3D
-            const originX = cw / 2;
-            const originY = ch * 0.75;
-            const scale = Math.min(cw / (width + depth), ch / (height + depth)) * 8.5;
+            // Proiezione Isometrica Semplificata e Calibrata
+            const centerX = cw / 2;
+            const centerY = ch * 0.65;
+            const scale = Math.min(cw / (width * 2.2), ch / (depth * 1.8)) * 0.9;
 
-            function toIso(x, y, z) {
-                const isoX = originX + (x - y) * Math.cos(0.5235) * scale;
-                const isoY = originY - z * scale * 1.2 + (x + y) * Math.sin(0.5235) * scale * 0.6;
+            function isoProject(x, y, z) {
+                // Angolo Isometrico standard (30 gradi)
+                const isoX = centerX + (x - y) * Math.cos(0.5235) * scale;
+                const isoY = centerY + (x + y) * Math.sin(0.5235) * scale * 0.5 - (z * scale * 0.8);
                 return { x: isoX, y: isoY };
             }
 
-            // 1. Pavimento Venue (Griglia 3D)
-            const p1 = toIso(-width/2, 0, 0);
-            const p2 = toIso(width/2, 0, 0);
-            const p3 = toIso(width/2, depth, 0);
-            const p4 = toIso(-width/2, depth, 0);
+            // 1. Pavimento Venue (Griglia Base 3D)
+            const vP1 = isoProject(-width/2, 0, 0);
+            const vP2 = isoProject(width/2, 0, 0);
+            const vP3 = isoProject(width/2, depth, 0);
+            const vP4 = isoProject(-width/2, depth, 0);
 
             ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.lineTo(p3.x, p3.y);
-            ctx.lineTo(p4.x, p4.y);
+            ctx.moveTo(vP1.x, vP1.y);
+            ctx.lineTo(vP2.x, vP2.y);
+            ctx.lineTo(vP3.x, vP3.y);
+            ctx.lineTo(vP4.x, vP4.y);
             ctx.closePath();
             ctx.fillStyle = "#0f172a";
             ctx.fill();
             ctx.strokeStyle = "#334155";
+            ctx.lineWidth = 1.5;
             ctx.stroke();
+
+            // Pareti trasparenti Venue (Tratteggiate)
+            const vTop1 = isoProject(-width/2, 0, height);
+            const vTop2 = isoProject(width/2, 0, height);
+            const vTop4 = isoProject(-width/2, depth, height);
+
+            ctx.strokeStyle = "rgba(71, 85, 105, 0.4)";
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(vP1.x, vP1.y); ctx.lineTo(vTop1.x, vTop1.y);
+            ctx.moveTo(vP2.x, vP2.y); ctx.lineTo(vTop2.x, vTop2.y);
+            ctx.moveTo(vP4.x, vP4.y); ctx.lineTo(vTop4.x, vTop4.y);
+            ctx.moveTo(vTop1.x, vTop1.y); ctx.lineTo(vTop2.x, vTop2.y);
+            ctx.moveTo(vTop1.x, vTop1.y); ctx.lineTo(vTop4.x, vTop4.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
 
             // 2. Palco 3D
-            const stageP1 = toIso(-stW/2, 0, 0);
-            const stageP2 = toIso(stW/2, 0, 0);
-            const stageP3 = toIso(stW/2, stD, 0);
-            const stageP4 = toIso(-stW/2, stD, 0);
+            const stageHeightZ = 1.2;
+            const sP1 = isoProject(-stW/2, 0, 0);
+            const sP2 = isoProject(stW/2, 0, 0);
+            const sP3 = isoProject(stW/2, stD, 0);
+            const sP4 = isoProject(-stW/2, stD, 0);
 
-            const stageH3D = 1.2;
-            const stageTop1 = toIso(-stW/2, 0, stageH3D);
-            const stageTop2 = toIso(stW/2, 0, stageH3D);
-            const stageTop3 = toIso(stW/2, stD, stageH3D);
-            const stageTop4 = toIso(-stW/2, stD, stageH3D);
+            const sT1 = isoProject(-stW/2, 0, stageHeightZ);
+            const sT2 = isoProject(stW/2, 0, stageHeightZ);
+            const sT3 = isoProject(stW/2, stD, stageHeightZ);
+            const sT4 = isoProject(-stW/2, stD, stageHeightZ);
 
-            // Estrusione Palco
-            ctx.fillStyle = "#334155";
-            ctx.beginPath();
-            ctx.moveTo(stageP1.x, stageP1.y);
-            ctx.lineTo(stageP2.x, stageP2.y);
-            ctx.lineTo(stageTop2.x, stageTop2.y);
-            ctx.lineTo(stageTop1.x, stageTop1.y);
-            ctx.fill();
-
+            // Faccia Frontale Palco
             ctx.fillStyle = "#1e293b";
             ctx.beginPath();
-            ctx.moveTo(stageTop1.x, stageTop1.y);
-            ctx.lineTo(stageTop2.x, stageTop2.y);
-            ctx.lineTo(stageTop3.x, stageTop3.y);
-            ctx.lineTo(stageTop4.x, stageTop4.y);
-            ctx.fill();
-            ctx.strokeStyle = "#475569";
+            ctx.moveTo(sP1.x, sP1.y); ctx.lineTo(sP2.x, sP2.y);
+            ctx.lineTo(sT2.x, sT2.y); ctx.lineTo(sT1.x, sT1.y);
+            ctx.fill(); ctx.stroke();
+
+            // Faccia Laterale Palco
+            ctx.fillStyle = "#334155";
+            ctx.beginPath();
+            ctx.moveTo(sP2.x, sP2.y); ctx.lineTo(sP3.x, sP3.y);
+            ctx.lineTo(sT3.x, sT3.y); ctx.lineTo(sT2.x, sT2.y);
+            ctx.fill(); ctx.stroke();
+
+            // Piano Calpestabile Palco
+            ctx.fillStyle = "#475569";
+            ctx.beginPath();
+            ctx.moveTo(sT1.x, sT1.y); ctx.lineTo(sT2.x, sT2.y);
+            ctx.lineTo(sT3.x, sT3.y); ctx.lineTo(sT4.x, sT4.y);
+            ctx.fill(); ctx.stroke();
+
+            // 3. Cluster VIO L208 Sospesi (Rosso)
+            const rigZ = Math.min(height - 0.5, 6.0);
+            const clLeftPos = isoProject(-stW/2 - 0.8, 0.5, rigZ);
+            const clRightPos = isoProject(stW/2 + 0.8, 0.5, rigZ);
+
+            // Cavi d'acciaio sospensione
+            const rigTopL = isoProject(-stW/2 - 0.8, 0.5, height);
+            const rigTopR = isoProject(stW/2 + 0.8, 0.5, height);
+            
+            ctx.strokeStyle = "#fbbf24";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(clLeftPos.x, clLeftPos.y); ctx.lineTo(rigTopL.x, rigTopL.y);
+            ctx.moveTo(clRightPos.x, clRightPos.y); ctx.lineTo(rigTopR.x, rigTopR.y);
             ctx.stroke();
 
-            // 3. Cluster Sospesi Main Array VIO L208 (3D)
-            const clusterHeightZ = Math.min(height - 1, 5.5);
-            
-            // Cluster Left
-            const clLeftBase = toIso(-stW/2 - 0.5, 1, clusterHeightZ);
-            const clRightBase = toIso(stW/2 + 0.5, 1, clusterHeightZ);
-
+            // Moduli Array VIO L208
             ctx.fillStyle = "#ef4444";
             for (let i = 0; i < modulesPerSide; i++) {
-                const modZ = clusterHeightZ - (i * 0.35);
-                const mL = toIso(-stW/2 - 0.5, 1, modZ);
-                const mR = toIso(stW/2 + 0.5, 1, modZ);
+                const modZ = rigZ - (i * 0.35);
+                const mL = isoProject(-stW/2 - 0.8, 0.5, modZ);
+                const mR = isoProject(stW/2 + 0.8, 0.5, modZ);
 
-                ctx.fillRect(mL.x - 4, mL.y, 8, 5);
-                ctx.fillRect(mR.x - 4, mR.y, 8, 5);
+                ctx.fillRect(mL.x - 6, mL.y, 12, 6);
+                ctx.fillRect(mR.x - 6, mR.y, 12, 6);
             }
 
-            // Cavetti Sospensione
-            const topRigL = toIso(-stW/2 - 0.5, 1, height);
-            const topRigR = toIso(stW/2 + 0.5, 1, height);
-            ctx.strokeStyle = "#94a3b8";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(clLeftBase.x, clLeftBase.y);
-            ctx.lineTo(topRigL.x, topRigL.y);
-            ctx.moveTo(clRightBase.x, clRightBase.y);
-            ctx.lineTo(topRigR.x, topRigR.y);
-            ctx.stroke();
-
-            // 4. Subwoofer S118R 3D a terra
+            // 4. Subwoofer S118R 3D (Verde)
             ctx.fillStyle = "#22c55e";
             const subSpacing = stW / (totalSubs + 1);
             for (let i = 1; i <= totalSubs; i++) {
                 const subX = -stW/2 + (subSpacing * i);
-                const subPos = toIso(subX, stD + 0.5, 0);
-                ctx.fillRect(subPos.x - 5, subPos.y - 4, 10, 6);
+                const subPos = isoProject(subX, stD + 0.3, 0);
+                ctx.fillRect(subPos.x - 7, subPos.y - 6, 14, 8);
             }
         }
 
         // MODAL CONTROLS
         function open3DModal() {
             document.getElementById('modal3D').classList.remove('hidden');
-            draw3DPreview();
+            setTimeout(draw3DPreview, 50); // Piccolo ritardo per permettere al browser di ridimensionare il canvas
         }
 
         function close3DModal() {
