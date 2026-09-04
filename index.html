@@ -66,12 +66,18 @@
                 </div>
 
                 <!-- SELEZIONE USO SPIE PALCO -->
-                <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700/60">
-                    <label class="block text-xs font-semibold text-amber-400 mb-1">Uso Spie di Palco (dB VIO X10)</label>
-                    <select id="useStageMonitors" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
-                        <option value="yes" selected>Sì - Utilizza spie VIO X10 sul palco</option>
-                        <option value="no">No - Nessuna spia sul palco (In-Ear Monitor o evento non musicale)</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-4 bg-slate-900/50 p-3 rounded-lg border border-slate-700/60">
+                    <div>
+                        <label class="block text-xs font-semibold text-amber-400 mb-1">Uso Spie Palco (VIO X10)</label>
+                        <select id="useStageMonitors" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
+                            <option value="yes" selected>Sì - Utilizza spie VIO X10</option>
+                            <option value="no">No - Nessuna spia sul palco</option>
+                        </select>
+                    </div>
+                    <div id="monitorsQtyContainer">
+                        <label class="block text-xs font-semibold text-amber-400 mb-1">Quantità Spie da Utilizzare</label>
+                        <input type="number" id="stageMonitorsCount" value="4" min="1" max="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
+                    </div>
                 </div>
 
                 <!-- PARAMETRI VENUE E PALCO -->
@@ -190,6 +196,7 @@
                         <div class="flex justify-between text-[9px] text-slate-400 mt-2 px-1 font-mono">
                             <span>🔴 Main Array / Frontfill L208</span>
                             <span>🟩 Sub S118R</span>
+                            <span>🔵 Spie Palco VIO X10</span>
                             <span>🟨 Pubblico</span>
                         </div>
                     </div>
@@ -330,6 +337,7 @@
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-500 rounded-sm"></span> Main Cluster VIO L208</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-amber-600 rounded-sm"></span> Frontfill VIO L208</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-500 rounded-sm"></span> Subwoofer VIO S118R</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span> Spie Palco VIO X10</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-700 rounded-sm"></span> Palco</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-amber-500 rounded-sm"></span> Pubblico 3D</span>
         </div>
@@ -345,6 +353,9 @@
 
         // DOM Elements Input
         const useStageMonitors = document.getElementById('useStageMonitors');
+        const stageMonitorsCount = document.getElementById('stageMonitorsCount');
+        const monitorsQtyContainer = document.getElementById('monitorsQtyContainer');
+
         const venueDepth = document.getElementById('venueDepth');
         const venueWidth = document.getElementById('venueWidth');
         const venueHeight = document.getElementById('venueHeight');
@@ -396,8 +407,18 @@
         const summaryMonRow = document.getElementById('summaryMonRow');
         const resSummaryWeightTotal = document.getElementById('resSummaryWeightTotal');
 
+        // Toggle visibilità campo quantità spie
+        useStageMonitors.addEventListener('change', () => {
+            if (useStageMonitors.value === 'yes') {
+                monitorsQtyContainer.classList.remove('hidden');
+            } else {
+                monitorsQtyContainer.classList.add('hidden');
+            }
+            calculateSystem();
+        });
+
         // 1. ANTEPRIMA GRAFICA 2D
-        function drawVenuePreview(depth, width, stW, stD, audStart, people, modulesPerSide, totalSubs, ffModulesCount) {
+        function drawVenuePreview(depth, width, stW, stD, audStart, people, modulesPerSide, totalSubs, ffModulesCount, monitorsCount) {
             const canvas = document.getElementById('venueCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -482,6 +503,15 @@
                     ctx.fillRect(stageX + (ffSpacing * i) - 3, stageY + stageH - 1, 6, 3);
                 }
             }
+
+            // Spie VIO X10 sul palco (Blu)
+            if (monitorsCount > 0) {
+                ctx.fillStyle = "#3b82f6";
+                const monSpacing = stageW / (monitorsCount + 1);
+                for (let i = 1; i <= monitorsCount; i++) {
+                    ctx.fillRect(stageX + (monSpacing * i) - 2.5, stageY + stageH - 5, 5, 3);
+                }
+            }
         }
 
         // 2. MOTORE 3D REALE CON THREE.JS
@@ -526,7 +556,22 @@
             animate();
         }
 
-        // CREAZIONE UNIFICATA SEDIA + PERSONA CORRETTAMENTE ALLINEATE
+        // CREAZIONE MONITOR/SPIA VIO X10 INCLINATA (WEDGE)
+        function create3DStageMonitor() {
+            const monGroup = new THREE.Group();
+            const monMat = new THREE.MeshStandardMaterial({ color: 0x2563eb }); // Blu
+
+            const boxGeo = new THREE.BoxGeometry(0.35, 0.25, 0.45);
+            const box = new THREE.Mesh(boxGeo, monMat);
+            
+            // Inclinazione del monitor verso i musicisti
+            box.rotation.x = -Math.PI / 6; // ~30 gradi
+            box.position.set(0, 0.12, 0);
+
+            monGroup.add(box);
+            return monGroup;
+        }
+
         function create3DSeatedPerson() {
             const comboGroup = new THREE.Group();
 
@@ -534,62 +579,48 @@
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xf3a683 });
             const clothesMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
 
-            // 1. Sedia
-            // Seduta centrata a Z = 0
+            // Sedia
             const seatGeo = new THREE.BoxGeometry(0.45, 0.05, 0.45);
             const seat = new THREE.Mesh(seatGeo, chairMat);
             seat.position.set(0, 0.4, 0);
 
-            // Schienale posto sul retro (lungo +Z, cioè verso il fondo della sala)
             const backGeo = new THREE.BoxGeometry(0.45, 0.45, 0.05);
             const back = new THREE.Mesh(backGeo, chairMat);
             back.position.set(0, 0.65, 0.2);
 
-            // Gambe sedia
             const legChairGeo = new THREE.BoxGeometry(0.04, 0.4, 0.04);
             const cLeg1 = new THREE.Mesh(legChairGeo, chairMat); cLeg1.position.set(-0.2, 0.2, -0.2);
             const cLeg2 = new THREE.Mesh(legChairGeo, chairMat); cLeg2.position.set(0.2, 0.2, -0.2);
             const cLeg3 = new THREE.Mesh(legChairGeo, chairMat); cLeg3.position.set(-0.2, 0.2, 0.2);
             const cLeg4 = new THREE.Mesh(legChairGeo, chairMat); cLeg4.position.set(0.2, 0.2, 0.2);
 
-            comboGroup.add(seat);
-            comboGroup.add(back);
+            comboGroup.add(seat); comboGroup.add(back);
             comboGroup.add(cLeg1); comboGroup.add(cLeg2); comboGroup.add(cLeg3); comboGroup.add(cLeg4);
 
-            // 2. Persona Seduta (Rivolta verso -Z, cioè verso il palco)
-            // Busto
+            // Persona Seduta
             const torsoGeo = new THREE.BoxGeometry(0.35, 0.45, 0.2);
             const torso = new THREE.Mesh(torsoGeo, clothesMat);
             torso.position.set(0, 0.65, 0.05);
 
-            // Testa
             const headGeo = new THREE.SphereGeometry(0.12, 8, 8);
             const head = new THREE.Mesh(headGeo, skinMat);
             head.position.set(0, 0.95, 0.05);
 
-            // Cosce (orizzontali, sporgenti verso il palco / -Z)
             const thighGeo = new THREE.BoxGeometry(0.1, 0.1, 0.3);
-            const thighL = new THREE.Mesh(thighGeo, clothesMat);
-            thighL.position.set(-0.1, 0.42, -0.1);
-            const thighR = new THREE.Mesh(thighGeo, clothesMat);
-            thighR.position.set(0.1, 0.42, -0.1);
+            const thighL = new THREE.Mesh(thighGeo, clothesMat); thighL.position.set(-0.1, 0.42, -0.1);
+            const thighR = new THREE.Mesh(thighGeo, clothesMat); thighR.position.set(0.1, 0.42, -0.1);
 
-            // Polpacci (verticali che scendono verso il pavimento)
             const calfGeo = new THREE.BoxGeometry(0.1, 0.35, 0.1);
-            const calfL = new THREE.Mesh(calfGeo, clothesMat);
-            calfL.position.set(-0.1, 0.2, -0.22);
-            const calfR = new THREE.Mesh(calfGeo, clothesMat);
-            calfR.position.set(0.1, 0.2, -0.22);
+            const calfL = new THREE.Mesh(calfGeo, clothesMat); calfL.position.set(-0.1, 0.2, -0.22);
+            const calfR = new THREE.Mesh(calfGeo, clothesMat); calfR.position.set(0.1, 0.2, -0.22);
 
-            comboGroup.add(torso);
-            comboGroup.add(head);
+            comboGroup.add(torso); comboGroup.add(head);
             comboGroup.add(thighL); comboGroup.add(thighR);
             comboGroup.add(calfL); comboGroup.add(calfR);
 
             return comboGroup;
         }
 
-        // PERSONA IN PIEDI (Rivolta verso il palco / -Z)
         function create3DStandingPerson() {
             const personGroup = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xf3a683 });
@@ -604,22 +635,20 @@
             torso.position.set(0, 1.05, 0);
 
             const legGeo = new THREE.BoxGeometry(0.12, 0.7, 0.12);
-            const legL = new THREE.Mesh(legGeo, clothesMat);
-            legL.position.set(-0.1, 0.45, 0);
+            const legL = new THREE.Mesh(legGeo, clothesMat); legL.position.set(-0.1, 0.45, 0);
+            const legR = new THREE.Mesh(legGeo, clothesMat); legR.position.set(0.1, 0.45, 0);
 
-            const legR = new THREE.Mesh(legGeo, clothesMat);
-            legR.position.set(0.1, 0.45, 0);
-
-            personGroup.add(head);
-            personGroup.add(torso);
-            personGroup.add(legL);
-            personGroup.add(legR);
+            personGroup.add(head); personGroup.add(torso);
+            personGroup.add(legL); personGroup.add(legR);
 
             return personGroup;
         }
 
         function build3DScene() {
             if (!scene3D) return;
+
+            const useMonitors = useStageMonitors.value === 'yes';
+            const monitorsCount = useMonitors ? Math.min(parseInt(stageMonitorsCount.value) || 0, 4) : 0;
 
             const vDepth = parseFloat(venueDepth.value) || 30;
             const vWidth = parseFloat(venueWidth.value) || 20;
@@ -709,6 +738,19 @@
                 }
             }
 
+            // SPIE VIO X10 SUL PALCO (Inclinati verso l'interno)
+            if (monitorsCount > 0) {
+                const monSpacing = stW / (monitorsCount + 1);
+
+                for (let i = 1; i <= monitorsCount; i++) {
+                    const monX = -stW / 2 + (monSpacing * i);
+                    const stageMon = create3DStageMonitor();
+                    stageMon.position.set(monX, stH, stD - 1.2); // Disposti vicino al fronte del palco
+                    stageMon.castShadow = true;
+                    scene3D.add(stageMon);
+                }
+            }
+
             // Subwoofer S118R
             const subGeo = new THREE.BoxGeometry(0.6, 0.7, 0.7);
             const subMat = new THREE.MeshStandardMaterial({ color: 0x22c55e });
@@ -780,6 +822,10 @@
 
         function calculateSystem() {
             const useMonitors = useStageMonitors.value === 'yes';
+            let requestedMonitors = useMonitors ? parseInt(stageMonitorsCount.value) || 0 : 0;
+            if (requestedMonitors < 0) requestedMonitors = 0;
+            if (requestedMonitors > 4) requestedMonitors = 4;
+
             const depth = parseFloat(venueDepth.value) || 10;
             const width = parseFloat(venueWidth.value) || 10;
             const height = parseFloat(venueHeight.value) || 5;
@@ -847,9 +893,11 @@
 
             const missingL208 = totalL208Required - maxL208;
             const missingS118R = totalSubs - maxS118R;
+            const missingMonitors = requestedMonitors - maxX10;
 
             let isArrayDeficit = missingL208 > 0;
             let isSubDeficit = missingS118R > 0;
+            let isMonDeficit = missingMonitors > 0;
 
             if (isArrayDeficit) {
                 arrayCardBox.className = "mb-4 bg-red-950/30 p-5 rounded-xl border-2 border-red-600 relative overflow-hidden transition-all duration-300";
@@ -873,7 +921,7 @@
                 resSubTotal.className = "text-3xl font-extrabold text-amber-500";
             }
 
-            if (isArrayDeficit || isSubDeficit) {
+            if (isArrayDeficit || isSubDeficit || isMonDeficit) {
                 stockStatus.className = "p-4 rounded-lg bg-red-950/80 border-2 border-red-600 text-red-200 text-sm space-y-2";
                 
                 let alertHTML = `<div class="font-bold text-red-400 text-base">⚠ ATTENZIONE: MATERIALE INSUFFICIENTE PER QUESTA VENUE!</div>`;
@@ -886,6 +934,9 @@
                 if (isSubDeficit) {
                     alertHTML += `<div>• <strong>VIO S118R:</strong> Servono <strong>+${missingS118R} sub</strong> (Totale ${totalSubs} anziché ${maxS118R}).</div>`;
                 }
+                if (isMonDeficit) {
+                    alertHTML += `<div>• <strong>VIO X10:</strong> Servono <strong>+${missingMonitors} spie</strong> (Totale ${requestedMonitors} anziché ${maxX10}).</div>`;
+                }
                 alertHTML += `</div>`;
 
                 stockStatus.innerHTML = alertHTML;
@@ -895,11 +946,11 @@
             }
 
             // Gestione Spie Palco (VIO X10)
-            if (useMonitors) {
+            if (useMonitors && requestedMonitors > 0) {
                 stageMonCardBox.classList.remove('hidden');
                 summaryMonRow.classList.remove('hidden');
-                resMonitorsTotal.textContent = `${maxX10}x Spie VIO X10 sul Palco`;
-                summaryX10Count.textContent = `${maxX10} pz`;
+                resMonitorsTotal.textContent = `${requestedMonitors}x Spie VIO X10 sul Palco`;
+                summaryX10Count.textContent = `${requestedMonitors} pz`;
             } else {
                 stageMonCardBox.classList.add('hidden');
                 summaryMonRow.classList.add('hidden');
@@ -937,20 +988,18 @@
             summaryFlybarCount.textContent = `2 pz (DRK-210)`;
             summarySubCount.textContent = `${totalSubs} pz`;
 
-            const usedX10Count = useMonitors ? maxX10 : 0;
-
             const totalTruckWeight = (totalL208Required * SPECS.l208.weight) + 
                                      (2 * SPECS.l208.flybarWeight) + 
                                      (totalSubs * SPECS.s118r.weight) + 
-                                     (usedX10Count * SPECS.x10.weight);
+                                     (requestedMonitors * SPECS.x10.weight);
 
             resSummaryWeightTotal.textContent = `Peso carico: ~${Math.round(totalTruckWeight)} kg`;
 
-            drawVenuePreview(depth, width, stW, stD, audStart, people, modulesPerSide, totalSubs, frontfillL208Modules);
+            drawVenuePreview(depth, width, stW, stD, audStart, people, modulesPerSide, totalSubs, frontfillL208Modules, requestedMonitors);
         }
 
         // Listeners
-        [useStageMonitors, venueDepth, venueWidth, venueHeight, stageWidth, stageDepth, stageHeight, audienceStart, peopleCount, seatingType, eventType, stockArray, stockSub, stockMonitors].forEach(el => {
+        [useStageMonitors, stageMonitorsCount, venueDepth, venueWidth, venueHeight, stageWidth, stageDepth, stageHeight, audienceStart, peopleCount, seatingType, eventType, stockArray, stockSub, stockMonitors].forEach(el => {
             el.addEventListener('input', calculateSystem);
             el.addEventListener('change', calculateSystem);
         });
