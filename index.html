@@ -63,21 +63,33 @@
                 </div>
 
                 <!-- PARAMETRI VENUE LIBERI -->
-                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 pt-2">2. Dimensioni Venue e Tipologia Evento</h2>
+                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 pt-2">2. Dimensioni Venue e Palco</h2>
 
-                <!-- Dimensioni Misure Venue -->
+                <!-- Misure Venue -->
                 <div class="grid grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Profondità (m)</label>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Profondità Venue (m)</label>
                         <input type="number" id="venueDepth" value="30" min="5" max="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Larghezza (m)</label>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Larghezza Venue (m)</label>
                         <input type="number" id="venueWidth" value="20" min="5" max="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-300 mb-1">Altezza Soffitto (m)</label>
                         <input type="number" id="venueHeight" value="7" min="3" max="30" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Misure Palco Personalizzabili -->
+                <div class="grid grid-cols-2 gap-4 bg-slate-900/40 p-3 rounded-lg border border-slate-700/50">
+                    <div>
+                        <label class="block text-xs font-medium text-amber-400 mb-1">Larghezza Palco (m)</label>
+                        <input type="number" id="stageWidth" value="12" min="2" max="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-amber-400 mb-1">Profondità Palco (m)</label>
+                        <input type="number" id="stageDepth" value="8" min="2" max="30" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                 </div>
 
@@ -144,11 +156,13 @@
                         </div>
                     </div>
 
-                    <!-- ANTEPRIMA GRAFICA 2D CANTONE/LAYOUT VENUE -->
-                    <div class="mb-4 bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 print-card">
+                    <!-- ANTEPRIMA GRAFICA 2D/3D (CLICCABILE) -->
+                    <div onclick="open3DModal()" class="mb-4 bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 print-card cursor-pointer hover:border-amber-500/80 transition-all group relative">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">🎨 Anteprima Layout Venue (2D Top View)</span>
-                            <span class="text-[10px] text-slate-400">Scala dinamica</span>
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                                🎨 Layout Venue 2D (Clicca per Vista 3D) 🔍
+                            </span>
+                            <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-slate-950 transition-all">Apri 3D</span>
                         </div>
                         <div class="w-full bg-slate-950 rounded-lg border border-slate-800 overflow-hidden flex justify-center p-1">
                             <canvas id="venueCanvas" width="400" height="220" class="max-w-full"></canvas>
@@ -272,6 +286,30 @@
         </div>
     </div>
 
+    <!-- MODAL POPUP PER VISTA 3D SCHERMO INTERO -->
+    <div id="modal3D" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col justify-between p-4 md:p-8 no-print">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+                <h2 class="text-xl font-bold text-amber-500">Vista Isometrica 3D - Layout Venue & Rigging</h2>
+                <p class="text-xs text-slate-400">Rappresentazione prospettica 3D dell'installazione dBTechnologies VIO</p>
+            </div>
+            <button onclick="close3DModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg border border-slate-600 transition-all cursor-pointer">
+                ✕ Chiudi Vista 3D
+            </button>
+        </div>
+
+        <div class="flex-1 flex justify-center items-center my-4 overflow-hidden">
+            <canvas id="canvas3D" width="850" height="500" class="max-w-full max-h-full rounded-xl border border-slate-800 shadow-2xl bg-slate-950"></canvas>
+        </div>
+
+        <div class="flex justify-center gap-6 text-xs text-slate-400 font-mono border-t border-slate-800 pt-3">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-500 rounded-sm"></span> Main Cluster VIO L208</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-500 rounded-sm"></span> Subwoofer VIO S118R</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span> Frontfill VIO X10</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-700 rounded-sm"></span> Palco Personalizzato</span>
+        </div>
+    </div>
+
     <!-- LOGICA DI CALCOLO E GRAFICA IN JAVASCRIPT -->
     <script>
         const SPECS = {
@@ -284,6 +322,8 @@
         const venueDepth = document.getElementById('venueDepth');
         const venueWidth = document.getElementById('venueWidth');
         const venueHeight = document.getElementById('venueHeight');
+        const stageWidth = document.getElementById('stageWidth');
+        const stageDepth = document.getElementById('stageDepth');
         const peopleCount = document.getElementById('peopleCount');
         const seatingType = document.getElementById('seatingType');
         const eventType = document.getElementById('eventType');
@@ -326,7 +366,7 @@
         const resSummaryWeightTotal = document.getElementById('resSummaryWeightTotal');
 
         // FUNZIONE PER IL DISEGNO DEL LAYOUT 2D
-        function drawVenuePreview(depth, width, people, modulesPerSide, totalSubs, frontfillCount) {
+        function drawVenuePreview(depth, width, stW, stD, people, modulesPerSide, totalSubs, frontfillCount) {
             const canvas = document.getElementById('venueCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -355,9 +395,9 @@
             ctx.lineWidth = 1.5;
             ctx.strokeRect(startX, startY, drawW, drawH);
 
-            // 2. Palco
-            const stageW = Math.min(drawW * 0.7, drawW - 10);
-            const stageH = 12;
+            // 2. Palco Personalizzato
+            const stageW = Math.min(stW * scale, drawW - 6);
+            const stageH = Math.min(stD * scale, drawH * 0.4);
             const stageX = startX + (drawW - stageW) / 2;
             const stageY = startY + 2;
 
@@ -369,7 +409,7 @@
             ctx.fillStyle = "#94a3b8";
             ctx.font = "8px sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText("STAGE", stageX + stageW / 2, stageY + 9);
+            ctx.fillText(`PALCO (${stW}x${stD}m)`, stageX + stageW / 2, stageY + stageH / 2 + 3);
 
             // 3. Pubblico (Punti dinamici)
             ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
@@ -421,10 +461,152 @@
             }
         }
 
+        // FUNZIONE PER IL DISEGNO DELLA VISTA 3D ISOMETRICA
+        function draw3DPreview() {
+            const canvas = document.getElementById('canvas3D');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const cw = canvas.width;
+            const ch = canvas.height;
+
+            const depth = parseFloat(venueDepth.value) || 30;
+            const width = parseFloat(venueWidth.value) || 20;
+            const height = parseFloat(venueHeight.value) || 7;
+            const stW = parseFloat(stageWidth.value) || 12;
+            const stD = parseFloat(stageDepth.value) || 8;
+
+            const targetSPL = parseInt(eventType.value);
+            let modulesPerSide = 6;
+            if (depth <= 18) modulesPerSide = 3;
+            else if (depth > 18 && depth <= 28) modulesPerSide = 4;
+            else if (depth > 28 && depth <= 38) modulesPerSide = 6;
+            else if (depth > 38) modulesPerSide = 8;
+
+            let totalSubs = 4;
+            if (depth > 35) totalSubs = 6;
+
+            ctx.clearRect(0, 0, cw, ch);
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, cw, ch);
+
+            // Proiezione Isometrica 3D
+            const originX = cw / 2;
+            const originY = ch * 0.75;
+            const scale = Math.min(cw / (width + depth), ch / (height + depth)) * 8.5;
+
+            function toIso(x, y, z) {
+                const isoX = originX + (x - y) * Math.cos(0.5235) * scale;
+                const isoY = originY - z * scale * 1.2 + (x + y) * Math.sin(0.5235) * scale * 0.6;
+                return { x: isoX, y: isoY };
+            }
+
+            // 1. Pavimento Venue (Griglia 3D)
+            const p1 = toIso(-width/2, 0, 0);
+            const p2 = toIso(width/2, 0, 0);
+            const p3 = toIso(width/2, depth, 0);
+            const p4 = toIso(-width/2, depth, 0);
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.lineTo(p4.x, p4.y);
+            ctx.closePath();
+            ctx.fillStyle = "#0f172a";
+            ctx.fill();
+            ctx.strokeStyle = "#334155";
+            ctx.stroke();
+
+            // 2. Palco 3D
+            const stageP1 = toIso(-stW/2, 0, 0);
+            const stageP2 = toIso(stW/2, 0, 0);
+            const stageP3 = toIso(stW/2, stD, 0);
+            const stageP4 = toIso(-stW/2, stD, 0);
+
+            const stageH3D = 1.2;
+            const stageTop1 = toIso(-stW/2, 0, stageH3D);
+            const stageTop2 = toIso(stW/2, 0, stageH3D);
+            const stageTop3 = toIso(stW/2, stD, stageH3D);
+            const stageTop4 = toIso(-stW/2, stD, stageH3D);
+
+            // Estrusione Palco
+            ctx.fillStyle = "#334155";
+            ctx.beginPath();
+            ctx.moveTo(stageP1.x, stageP1.y);
+            ctx.lineTo(stageP2.x, stageP2.y);
+            ctx.lineTo(stageTop2.x, stageTop2.y);
+            ctx.lineTo(stageTop1.x, stageTop1.y);
+            ctx.fill();
+
+            ctx.fillStyle = "#1e293b";
+            ctx.beginPath();
+            ctx.moveTo(stageTop1.x, stageTop1.y);
+            ctx.lineTo(stageTop2.x, stageTop2.y);
+            ctx.lineTo(stageTop3.x, stageTop3.y);
+            ctx.lineTo(stageTop4.x, stageTop4.y);
+            ctx.fill();
+            ctx.strokeStyle = "#475569";
+            ctx.stroke();
+
+            // 3. Cluster Sospesi Main Array VIO L208 (3D)
+            const clusterHeightZ = Math.min(height - 1, 5.5);
+            
+            // Cluster Left
+            const clLeftBase = toIso(-stW/2 - 0.5, 1, clusterHeightZ);
+            const clRightBase = toIso(stW/2 + 0.5, 1, clusterHeightZ);
+
+            ctx.fillStyle = "#ef4444";
+            for (let i = 0; i < modulesPerSide; i++) {
+                const modZ = clusterHeightZ - (i * 0.35);
+                const mL = toIso(-stW/2 - 0.5, 1, modZ);
+                const mR = toIso(stW/2 + 0.5, 1, modZ);
+
+                ctx.fillRect(mL.x - 4, mL.y, 8, 5);
+                ctx.fillRect(mR.x - 4, mR.y, 8, 5);
+            }
+
+            // Cavetti Sospensione
+            const topRigL = toIso(-stW/2 - 0.5, 1, height);
+            const topRigR = toIso(stW/2 + 0.5, 1, height);
+            ctx.strokeStyle = "#94a3b8";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(clLeftBase.x, clLeftBase.y);
+            ctx.lineTo(topRigL.x, topRigL.y);
+            ctx.moveTo(clRightBase.x, clRightBase.y);
+            ctx.lineTo(topRigR.x, topRigR.y);
+            ctx.stroke();
+
+            // 4. Subwoofer S118R 3D a terra
+            ctx.fillStyle = "#22c55e";
+            const subSpacing = stW / (totalSubs + 1);
+            for (let i = 1; i <= totalSubs; i++) {
+                const subX = -stW/2 + (subSpacing * i);
+                const subPos = toIso(subX, stD + 0.5, 0);
+                ctx.fillRect(subPos.x - 5, subPos.y - 4, 10, 6);
+            }
+        }
+
+        // MODAL CONTROLS
+        function open3DModal() {
+            document.getElementById('modal3D').classList.remove('hidden');
+            draw3DPreview();
+        }
+
+        function close3DModal() {
+            document.getElementById('modal3D').classList.add('hidden');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") close3DModal();
+        });
+
         function calculateSystem() {
             const depth = parseFloat(venueDepth.value) || 10;
             const width = parseFloat(venueWidth.value) || 10;
             const height = parseFloat(venueHeight.value) || 5;
+            const stW = parseFloat(stageWidth.value) || 10;
+            const stD = parseFloat(stageDepth.value) || 6;
             const people = parseInt(peopleCount.value) || 100;
             const seating = seatingType.value;
             const targetSPL = parseInt(eventType.value);
@@ -506,7 +688,7 @@
             if (isArrayDeficit || isSubDeficit) {
                 stockStatus.className = "p-4 rounded-lg bg-red-950/80 border-2 border-red-600 text-red-200 text-sm space-y-2";
                 
-                let alertHTML = `<div class="font-bold text-red-400 text-base">⚠ ATTENZIONE: MATERIALE INSUFFICIENTI PER QUESTA VENUE!</div>`;
+                let alertHTML = `<div class="font-bold text-red-400 text-base">⚠ ATTENZIONE: MATERIALE INSUFFICIENTE PER QUESTA VENUE!</div>`;
                 alertHTML += `<div class="text-xs text-slate-200">Il tuo magazzino VIO non è sufficiente per garantire la copertura o la pressione acustica richiesta.</div>`;
                 alertHTML += `<div class="bg-red-900/40 p-2.5 rounded border border-red-700/50 text-xs font-mono mt-2 space-y-1">`;
                 
@@ -527,8 +709,8 @@
 
             // 5. Frontfill VIO X10
             let frontfillCount = 0;
-            if (width >= 12 && seating !== 'seated') frontfillCount = 2;
-            if (width >= 18) frontfillCount = 4;
+            if (stW >= 10 && seating !== 'seated') frontfillCount = 2;
+            if (stW >= 16) frontfillCount = 4;
             if (frontfillCount > maxX10) frontfillCount = maxX10;
 
             const remainingMonitors = maxX10 - frontfillCount;
@@ -578,11 +760,11 @@
             resSummaryWeightTotal.textContent = `Peso carico: ~${Math.round(totalTruckWeight)} kg`;
 
             // 8. DISEGNA ANTEPRIMA GRAFICA 2D
-            drawVenuePreview(depth, width, people, modulesPerSide, totalSubs, frontfillCount);
+            drawVenuePreview(depth, width, stW, stD, people, modulesPerSide, totalSubs, frontfillCount);
         }
 
         // Listeners
-        [venueDepth, venueWidth, venueHeight, peopleCount, seatingType, eventType, stockArray, stockSub, stockMonitors].forEach(el => {
+        [venueDepth, venueWidth, venueHeight, stageWidth, stageDepth, peopleCount, seatingType, eventType, stockArray, stockSub, stockMonitors].forEach(el => {
             el.addEventListener('input', calculateSystem);
             el.addEventListener('change', calculateSystem);
         });
