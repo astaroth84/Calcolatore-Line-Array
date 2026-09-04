@@ -127,12 +127,30 @@
                         </div>
                     </div>
 
-                    <!-- Main Array VIO L208 -->
-                    <div class="mb-4 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Main Array: dB VIO L208 (per lato)</div>
-                        <div id="resArrayPerSide" class="text-3xl font-extrabold text-amber-500">0 moduli</div>
-                        <div id="resArrayTotal" class="text-sm text-slate-400 mt-1">Totale usati: 0 su 18</div>
-                        <div id="resHeadroom" class="text-xs text-emerald-400 mt-2">SPL Max teorico al FOH: -- dB</div>
+                    <!-- Main Array VIO L208 (EVIDENZIATO MODULI TOTALI) -->
+                    <div class="mb-4 bg-amber-500/10 p-5 rounded-xl border-2 border-amber-500/50 relative overflow-hidden">
+                        <div class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Main Array: dB VIO L208</div>
+                        
+                        <!-- Box Totale Moduli Impianto -->
+                        <div class="flex items-baseline justify-between mb-3 border-b border-amber-500/30 pb-3">
+                            <div>
+                                <span class="text-xs text-slate-300 block">TOTALE MODULI USATI</span>
+                                <span id="resArrayTotalBig" class="text-4xl font-extrabold text-amber-400">12</span>
+                                <span id="resArrayStockMax" class="text-sm text-slate-400 font-semibold"> / 18 disponibili</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-300 block">CONFIGURAZIONE</span>
+                                <span id="resArrayPerSideBig" class="text-2xl font-bold text-white">6 + 6</span>
+                                <span class="text-xs text-amber-300 block">per lato (L/R)</span>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar Impegno Magazzino -->
+                        <div class="w-full bg-slate-900/80 rounded-full h-2.5 overflow-hidden mb-2">
+                            <div id="resArrayProgressBar" class="bg-amber-500 h-2.5 rounded-full transition-all duration-300" style="width: 66%"></div>
+                        </div>
+
+                        <div id="resHeadroom" class="text-xs text-emerald-400 font-medium pt-1">SPL Max teorico al FOH: -- dB</div>
                     </div>
 
                     <!-- Rigging / Weight Details VIO L208 -->
@@ -169,7 +187,7 @@
                     <div class="mb-6 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
                         <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Frontfill / Utility: dB VIO X10</div>
                         <div id="resMonitorsTotal" class="text-xl font-bold text-slate-200">2x Frontfill</div>
-                        <div id="resMonitorsAdvice" class="text-xs text-slate-400 mt-1">2 usati come Frontfill / 2 per Spie</div>
+                        <div id="resMonitorsAdvice" class="text-xs text-slate-400 mt-1">2 usati per Frontfill | 2 per Spie</div>
                     </div>
 
                     <!-- Indicatore Disponibilità / Alert -->
@@ -189,7 +207,7 @@
     <!-- LOGICA DI CALCOLO IN JAVASCRIPT -->
     <script>
         const SPECS = {
-            l208: { weight: 18.1, maxSPL: 133.5, flybarWeight: 17, heightModule: 0.26 }, // 26cm di altezza per modulo
+            l208: { weight: 18.1, maxSPL: 133.5, flybarWeight: 17, heightModule: 0.26 },
             s118r: { weight: 47.0, maxSPL: 139 },
             x10: { weight: 13.6, maxSPL: 130 }
         };
@@ -209,8 +227,12 @@
         // DOM Elements Output
         const resArea = document.getElementById('resArea');
         const resDensity = document.getElementById('resDensity');
-        const resArrayPerSide = document.getElementById('resArrayPerSide');
-        const resArrayTotal = document.getElementById('resArrayTotal');
+        
+        const resArrayTotalBig = document.getElementById('resArrayTotalBig');
+        const resArrayStockMax = document.getElementById('resArrayStockMax');
+        const resArrayPerSideBig = document.getElementById('resArrayPerSideBig');
+        const resArrayProgressBar = document.getElementById('resArrayProgressBar');
+
         const resSubTotal = document.getElementById('resSubTotal');
         const resSubConfig = document.getElementById('resSubConfig');
         const resMonitorsTotal = document.getElementById('resMonitorsTotal');
@@ -249,7 +271,6 @@
             else if (depth > 38 && depth <= 48) baseModules = 8;
             else if (depth > 48) baseModules = 9;
 
-            // Adeguamento per SPL Target o Gradinata
             if ((targetSPL >= 106 || seating === 'tribune') && depth > 20 && baseModules < 9) {
                 baseModules = Math.min(9, baseModules + 1);
             }
@@ -257,7 +278,22 @@
             const modulesPerSide = baseModules;
             const totalModules = modulesPerSide * 2;
 
-            // 3. Calcolo Sub S118R
+            // 3. Rendering Evidenziato Main Array
+            resArrayTotalBig.textContent = totalModules;
+            resArrayStockMax.textContent = ` / ${maxL208} pronti`;
+            resArrayPerSideBig.textContent = `${modulesPerSide} + ${modulesPerSide}`;
+
+            // Progress bar percentuale magazzino
+            const usagePercentage = Math.min(100, Math.round((totalModules / Math.max(1, maxL208)) * 100));
+            resArrayProgressBar.style.width = `${usagePercentage}%`;
+
+            if (totalModules > maxL208) {
+                resArrayProgressBar.className = "bg-red-500 h-2.5 rounded-full transition-all duration-300";
+            } else {
+                resArrayProgressBar.className = "bg-amber-500 h-2.5 rounded-full transition-all duration-300";
+            }
+
+            // 4. Calcolo Sub S118R
             let totalSubs = 2;
             if (depth > 22 || targetSPL >= 102 || people > 800) {
                 totalSubs = 4;
@@ -268,7 +304,7 @@
                 subText = "4x totali (Linea di Sub o Cardioide 3+1)";
             }
 
-            // 4. Calcolo Frontfill VIO X10 (in base a larghezza e disposizione)
+            // 5. Calcolo Frontfill VIO X10
             let frontfillCount = 0;
             if (width >= 12 && seating !== 'seated') frontfillCount = 2;
             if (width >= 18) frontfillCount = 4;
@@ -276,11 +312,11 @@
 
             const remainingMonitors = maxX10 - frontfillCount;
 
-            // 5. Rigging & Carichi
+            // 6. Rigging & Carichi
             const clusterWeight = modulesPerSide * SPECS.l208.weight;
             const totalWeightPerSide = clusterWeight + SPECS.l208.flybarWeight;
-            const clusterLength = (modulesPerSide * SPECS.l208.heightModule) + 0.4; // +0.4m flybar
-            const minRiggingHeight = clusterLength + 2.5; // Altezza min per quota orecchio + inclinazione
+            const clusterLength = (modulesPerSide * SPECS.l208.heightModule) + 0.4;
+            const minRiggingHeight = clusterLength + 2.5;
 
             let motorSize = "250 kg WLL";
             if (totalWeightPerSide > 200) motorSize = "500 kg WLL";
@@ -289,8 +325,6 @@
             const splAtDistance = (SPECS.l208.maxSPL + (3 * Math.log2(modulesPerSide))) - (10 * Math.log10(depth));
 
             // Output Rendering
-            resArrayPerSide.textContent = `${modulesPerSide} moduli`;
-            resArrayTotal.textContent = `Totale usati: ${totalModules} su ${maxL208} disponibili`;
             resSubTotal.textContent = `${totalSubs} sub`;
             resSubConfig.textContent = `Configurazione: ${subText}`;
             
@@ -301,7 +335,7 @@
             resTotalWeight.textContent = `${totalWeightPerSide.toFixed(1)} kg`;
             resMotorAdvice.textContent = `Sospensione consigliata: Motore min. ${motorSize}`;
 
-            // Check Altezza Soffitto vs Cluster
+            // Check Altezza
             if (height < minRiggingHeight) {
                 resHeightCheck.className = "text-xs text-red-400 pt-1 border-t border-slate-800 font-bold";
                 resHeightCheck.textContent = `⚠ Soffitto basso (${height}m): Cluster alto ${clusterLength.toFixed(1)}m. Valutare Ground-stacking!`;
@@ -314,10 +348,10 @@
 
             // Verifiche Magazzino
             if (totalModules > maxL208 || totalSubs > maxS118R) {
-                stockStatus.className = "p-4 rounded-lg bg-red-950/50 border border-red-600/30 text-red-400 text-sm";
+                stockStatus.className = "p-4 rounded-lg bg-red-950/50 border border-red-600/30 text-red-400 text-sm font-semibold";
                 stockStatus.textContent = "⚠ ATTENZIONE: Il calcolo teorico supera la disponibilità impostata!";
             } else {
-                stockStatus.className = "p-4 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-emerald-400 text-sm";
+                stockStatus.className = "p-4 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-emerald-400 text-sm font-semibold";
                 stockStatus.textContent = "✓ Quantità del tuo magazzino VIO sufficienti per coprire l'evento.";
             }
         }
