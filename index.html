@@ -6,6 +6,9 @@
     <title>dBTechnologies Audio & Rigging Designer - By Santoro Carlo</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js e OrbitControls per la grafica 3D reale -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         @media print {
             body { background-color: white !important; color: black !important; }
@@ -160,12 +163,12 @@
                     <div onclick="open3DModal()" class="mb-4 bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 print-card cursor-pointer hover:border-amber-500/80 transition-all group relative">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
-                                🎨 Layout Venue 2D (Clicca per Vista 3D) 🔍
+                                🎨 Layout Venue 2D (Clicca per Similazione 3D Reale) 🔍
                             </span>
-                            <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-slate-950 transition-all font-bold">Apri 3D</span>
+                            <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-slate-950 transition-all font-bold">Apri 3D Interattivo</span>
                         </div>
                         <div class="w-full bg-slate-950 rounded-lg border border-slate-800 overflow-hidden flex justify-center p-1">
-                            <canvas id="venueCanvas" width="400" height="220" class="max-w-full"></canvas>
+                            <canvas id="venueCanvas" width="400" height="200" class="max-w-full"></canvas>
                         </div>
                         <div class="flex justify-between text-[9px] text-slate-400 mt-2 px-1 font-mono">
                             <span>🔴 Main Array</span>
@@ -286,20 +289,20 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP PER VISTA 3D SCHERMO INTERO -->
+    <!-- MODAL POPUP PER SIMULAZIONE 3D INTERATTIVA THREE.JS -->
     <div id="modal3D" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col justify-between p-4 md:p-6 no-print">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
             <div>
-                <h2 class="text-lg md:text-xl font-bold text-amber-500">Vista Isometrica 3D - Venue & Rigging</h2>
-                <p class="text-xs text-slate-400">Rappresentazione prospettica 3D dinamica dell'installazione VIO</p>
+                <h2 class="text-lg md:text-xl font-bold text-amber-500">Simulazione 3D Reale Interattiva - dBTechnologies VIO</h2>
+                <p class="text-xs text-slate-400">Trascina con il mouse/touch per RUOTARE | Rotellina mouse per ZOOM | Tasto Destro per SPOSTARE</p>
             </div>
             <button onclick="close3DModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2 px-4 rounded-lg transition-all cursor-pointer">
                 ✕ Chiudi Vista 3D
             </button>
         </div>
 
-        <div class="flex-1 flex justify-center items-center my-2 overflow-hidden relative">
-            <canvas id="canvas3D" width="900" height="520" class="max-w-full max-h-full rounded-xl border border-slate-800 shadow-2xl bg-slate-950"></canvas>
+        <div id="container3D" class="flex-1 w-full h-full rounded-xl border border-slate-800 shadow-2xl overflow-hidden relative my-2 bg-slate-950">
+            <!-- Il Canvas Three.js viene iniettato qui -->
         </div>
 
         <div class="flex justify-center flex-wrap gap-4 text-xs text-slate-400 font-mono border-t border-slate-800 pt-3">
@@ -365,7 +368,7 @@
         const summaryStageMonCount = document.getElementById('summaryStageMonCount');
         const resSummaryWeightTotal = document.getElementById('resSummaryWeightTotal');
 
-        // FUNZIONE PER IL DISEGNO DEL LAYOUT 2D
+        // 1. ANTEPRIMA GRAFICA 2D CANTONE
         function drawVenuePreview(depth, width, stW, stD, people, modulesPerSide, totalSubs, frontfillCount) {
             const canvas = document.getElementById('venueCanvas');
             if (!canvas) return;
@@ -390,12 +393,10 @@
             const startX = (cw - drawW) / 2;
             const startY = padding;
 
-            // 1. Perimetro Venue
             ctx.strokeStyle = "#334155";
             ctx.lineWidth = 1.5;
             ctx.strokeRect(startX, startY, drawW, drawH);
 
-            // 2. Palco Personalizzato
             const stageW = Math.min(stW * scale, drawW - 6);
             const stageH = Math.min(stD * scale, drawH * 0.4);
             const stageX = startX + (drawW - stageW) / 2;
@@ -411,7 +412,6 @@
             ctx.textAlign = "center";
             ctx.fillText(`PALCO (${stW}x${stD}m)`, stageX + stageW / 2, stageY + stageH / 2 + 3);
 
-            // 3. Pubblico (Punti dinamici)
             ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
             const dots = Math.min(Math.floor(people / 25), 60);
             for (let i = 0; i < dots; i++) {
@@ -422,25 +422,12 @@
                 ctx.fill();
             }
 
-            // 4. Main Array VIO L208 (Rosso)
             const arrW = 6;
             const arrH = Math.min(14, 4 + modulesPerSide * 0.8);
             ctx.fillStyle = "#ef4444";
             ctx.fillRect(stageX - 8, stageY + 2, arrW, arrH);
             ctx.fillRect(stageX + stageW + 2, stageY + 2, arrW, arrH);
 
-            // Lines di Copertura
-            ctx.strokeStyle = "rgba(239, 68, 68, 0.2)";
-            ctx.setLineDash([2, 2]);
-            ctx.beginPath();
-            ctx.moveTo(stageX - 5, stageY + 5);
-            ctx.lineTo(startX, startY + drawH);
-            ctx.moveTo(stageX + stageW + 5, stageY + 5);
-            ctx.lineTo(startX + drawW, startY + drawH);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // 5. Subwoofer S118R (Verdi)
             ctx.fillStyle = "#22c55e";
             const subW = 7;
             const subH = 4;
@@ -449,7 +436,6 @@
                 ctx.fillRect(stageX + (subSpacing * i) - (subW / 2), stageY + stageH + 1, subW, subH);
             }
 
-            // 6. Frontfill VIO X10 (Blu)
             if (frontfillCount > 0) {
                 ctx.fillStyle = "#3b82f6";
                 const ffSpacing = stageW / (frontfillCount + 1);
@@ -461,157 +447,171 @@
             }
         }
 
-        // FUNZIONE PER IL DISEGNO DELLA VISTA 3D ISOMETRICA CORRETTA
-        function draw3DPreview() {
-            const canvas = document.getElementById('canvas3D');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const cw = canvas.width;
-            const ch = canvas.height;
+        // 2. MOTORE 3D REALE CON THREE.JS
+        let scene3D, camera3D, renderer3D, controls3D, animId3D;
 
-            const depth = parseFloat(venueDepth.value) || 30;
-            const width = parseFloat(venueWidth.value) || 20;
-            const height = parseFloat(venueHeight.value) || 7;
-            const stW = parseFloat(stageWidth.value) || 12;
-            const stD = parseFloat(stageDepth.value) || 8;
+        function initThreeJS() {
+            const container = document.getElementById('container3D');
+            container.innerHTML = ""; // Pulisci container
 
-            let modulesPerSide = 6;
-            if (depth <= 18) modulesPerSide = 3;
-            else if (depth > 18 && depth <= 28) modulesPerSide = 4;
-            else if (depth > 28 && depth <= 38) modulesPerSide = 6;
-            else if (depth > 38) modulesPerSide = 8;
+            const width = container.clientWidth || 800;
+            const height = container.clientHeight || 500;
 
-            let totalSubs = 4;
-            if (depth > 35) totalSubs = 6;
+            // Scena
+            scene3D = new THREE.Scene();
+            scene3D.background = new THREE.Color(0x020617);
 
-            ctx.clearRect(0, 0, cw, ch);
-            ctx.fillStyle = "#020617";
-            ctx.fillRect(0, 0, cw, ch);
+            // Camera
+            camera3D = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
 
-            // Proiezione Isometrica Semplificata e Calibrata
-            const centerX = cw / 2;
-            const centerY = ch * 0.65;
-            const scale = Math.min(cw / (width * 2.2), ch / (depth * 1.8)) * 0.9;
+            // Renderer
+            renderer3D = new THREE.WebGLRenderer({ antialias: true });
+            renderer3D.setSize(width, height);
+            renderer3D.shadowMap.enabled = true;
+            container.appendChild(renderer3D.domElement);
 
-            function isoProject(x, y, z) {
-                // Angolo Isometrico standard (30 gradi)
-                const isoX = centerX + (x - y) * Math.cos(0.5235) * scale;
-                const isoY = centerY + (x + y) * Math.sin(0.5235) * scale * 0.5 - (z * scale * 0.8);
-                return { x: isoX, y: isoY };
+            // Orbit Controls
+            controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
+            controls3D.enableDamping = true;
+            controls3D.dampingFactor = 0.05;
+
+            // Luci
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene3D.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffb703, 0.8);
+            dirLight.position.set(20, 40, 20);
+            dirLight.castShadow = true;
+            scene3D.add(dirLight);
+
+            // COSTRUZIONE SCENA 3D IN BASE AI DATI
+            build3DScene();
+
+            // Loop Animazione
+            function animate() {
+                animId3D = requestAnimationFrame(animate);
+                controls3D.update();
+                renderer3D.render(scene3D, camera3D);
             }
-
-            // 1. Pavimento Venue (Griglia Base 3D)
-            const vP1 = isoProject(-width/2, 0, 0);
-            const vP2 = isoProject(width/2, 0, 0);
-            const vP3 = isoProject(width/2, depth, 0);
-            const vP4 = isoProject(-width/2, depth, 0);
-
-            ctx.beginPath();
-            ctx.moveTo(vP1.x, vP1.y);
-            ctx.lineTo(vP2.x, vP2.y);
-            ctx.lineTo(vP3.x, vP3.y);
-            ctx.lineTo(vP4.x, vP4.y);
-            ctx.closePath();
-            ctx.fillStyle = "#0f172a";
-            ctx.fill();
-            ctx.strokeStyle = "#334155";
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            // Pareti trasparenti Venue (Tratteggiate)
-            const vTop1 = isoProject(-width/2, 0, height);
-            const vTop2 = isoProject(width/2, 0, height);
-            const vTop4 = isoProject(-width/2, depth, height);
-
-            ctx.strokeStyle = "rgba(71, 85, 105, 0.4)";
-            ctx.setLineDash([3, 3]);
-            ctx.beginPath();
-            ctx.moveTo(vP1.x, vP1.y); ctx.lineTo(vTop1.x, vTop1.y);
-            ctx.moveTo(vP2.x, vP2.y); ctx.lineTo(vTop2.x, vTop2.y);
-            ctx.moveTo(vP4.x, vP4.y); ctx.lineTo(vTop4.x, vTop4.y);
-            ctx.moveTo(vTop1.x, vTop1.y); ctx.lineTo(vTop2.x, vTop2.y);
-            ctx.moveTo(vTop1.x, vTop1.y); ctx.lineTo(vTop4.x, vTop4.y);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // 2. Palco 3D
-            const stageHeightZ = 1.2;
-            const sP1 = isoProject(-stW/2, 0, 0);
-            const sP2 = isoProject(stW/2, 0, 0);
-            const sP3 = isoProject(stW/2, stD, 0);
-            const sP4 = isoProject(-stW/2, stD, 0);
-
-            const sT1 = isoProject(-stW/2, 0, stageHeightZ);
-            const sT2 = isoProject(stW/2, 0, stageHeightZ);
-            const sT3 = isoProject(stW/2, stD, stageHeightZ);
-            const sT4 = isoProject(-stW/2, stD, stageHeightZ);
-
-            // Faccia Frontale Palco
-            ctx.fillStyle = "#1e293b";
-            ctx.beginPath();
-            ctx.moveTo(sP1.x, sP1.y); ctx.lineTo(sP2.x, sP2.y);
-            ctx.lineTo(sT2.x, sT2.y); ctx.lineTo(sT1.x, sT1.y);
-            ctx.fill(); ctx.stroke();
-
-            // Faccia Laterale Palco
-            ctx.fillStyle = "#334155";
-            ctx.beginPath();
-            ctx.moveTo(sP2.x, sP2.y); ctx.lineTo(sP3.x, sP3.y);
-            ctx.lineTo(sT3.x, sT3.y); ctx.lineTo(sT2.x, sT2.y);
-            ctx.fill(); ctx.stroke();
-
-            // Piano Calpestabile Palco
-            ctx.fillStyle = "#475569";
-            ctx.beginPath();
-            ctx.moveTo(sT1.x, sT1.y); ctx.lineTo(sT2.x, sT2.y);
-            ctx.lineTo(sT3.x, sT3.y); ctx.lineTo(sT4.x, sT4.y);
-            ctx.fill(); ctx.stroke();
-
-            // 3. Cluster VIO L208 Sospesi (Rosso)
-            const rigZ = Math.min(height - 0.5, 6.0);
-            const clLeftPos = isoProject(-stW/2 - 0.8, 0.5, rigZ);
-            const clRightPos = isoProject(stW/2 + 0.8, 0.5, rigZ);
-
-            // Cavi d'acciaio sospensione
-            const rigTopL = isoProject(-stW/2 - 0.8, 0.5, height);
-            const rigTopR = isoProject(stW/2 + 0.8, 0.5, height);
-            
-            ctx.strokeStyle = "#fbbf24";
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(clLeftPos.x, clLeftPos.y); ctx.lineTo(rigTopL.x, rigTopL.y);
-            ctx.moveTo(clRightPos.x, clRightPos.y); ctx.lineTo(rigTopR.x, rigTopR.y);
-            ctx.stroke();
-
-            // Moduli Array VIO L208
-            ctx.fillStyle = "#ef4444";
-            for (let i = 0; i < modulesPerSide; i++) {
-                const modZ = rigZ - (i * 0.35);
-                const mL = isoProject(-stW/2 - 0.8, 0.5, modZ);
-                const mR = isoProject(stW/2 + 0.8, 0.5, modZ);
-
-                ctx.fillRect(mL.x - 6, mL.y, 12, 6);
-                ctx.fillRect(mR.x - 6, mR.y, 12, 6);
-            }
-
-            // 4. Subwoofer S118R 3D (Verde)
-            ctx.fillStyle = "#22c55e";
-            const subSpacing = stW / (totalSubs + 1);
-            for (let i = 1; i <= totalSubs; i++) {
-                const subX = -stW/2 + (subSpacing * i);
-                const subPos = isoProject(subX, stD + 0.3, 0);
-                ctx.fillRect(subPos.x - 7, subPos.y - 6, 14, 8);
-            }
+            animate();
         }
 
-        // MODAL CONTROLS
+        function build3DScene() {
+            if (!scene3D) return;
+
+            const vDepth = parseFloat(venueDepth.value) || 30;
+            const vWidth = parseFloat(venueWidth.value) || 20;
+            const vHeight = parseFloat(venueHeight.value) || 7;
+            const stW = parseFloat(stageWidth.value) || 12;
+            const stD = parseFloat(stageDepth.value) || 8;
+            const people = parseInt(peopleCount.value) || 1200;
+
+            let modulesPerSide = 6;
+            if (vDepth <= 18) modulesPerSide = 3;
+            else if (vDepth > 18 && vDepth <= 28) modulesPerSide = 4;
+            else if (vDepth > 28 && vDepth <= 38) modulesPerSide = 6;
+            else if (vDepth > 38) modulesPerSide = 8;
+
+            let totalSubs = 4;
+            if (vDepth > 35) totalSubs = 6;
+
+            // 1. Pavimento Venue
+            const floorGeo = new THREE.PlaneGeometry(vWidth, vDepth);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.set(0, 0, vDepth / 2);
+            floor.receiveShadow = true;
+            scene3D.add(floor);
+
+            // Griglia Pavimento
+            const grid = new THREE.GridHelper(Math.max(vWidth, vDepth), 20, 0xf59e0b, 0x334155);
+            grid.position.set(0, 0.01, vDepth / 2);
+            scene3D.add(grid);
+
+            // 2. Palco 3D
+            const stageGeo = new THREE.BoxGeometry(stW, 1.2, stD);
+            const stageMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
+            const stage = new THREE.Mesh(stageGeo, stageMat);
+            stage.position.set(0, 0.6, stD / 2);
+            stage.castShadow = true;
+            stage.receiveShadow = true;
+            scene3D.add(stage);
+
+            // 3. Struttura Americana / Truss di Sospensione
+            const trussGeo = new THREE.BoxGeometry(stW + 3, 0.4, 0.4);
+            const trussMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
+            const truss = new THREE.Mesh(trussGeo, trussMat);
+            const rigHeight = Math.min(vHeight - 0.5, 6.0);
+            truss.position.set(0, rigHeight, stD / 2);
+            scene3D.add(truss);
+
+            // 4. Moduli Array VIO L208 (Rosso)
+            const boxL208Geo = new THREE.BoxGeometry(0.7, SPECS.l208.heightModule, 0.4);
+            const boxL208Mat = new THREE.MeshStandardMaterial({ color: 0xef4444 });
+
+            const leftX = -stW / 2 - 0.5;
+            const rightX = stW / 2 + 0.5;
+
+            for (let i = 0; i < modulesPerSide; i++) {
+                const modY = rigHeight - 0.4 - (i * (SPECS.l208.heightModule + 0.05));
+                
+                // Modulo Sinistro
+                const modL = new THREE.Mesh(boxL208Geo, boxL208Mat);
+                modL.position.set(leftX, modY, stD / 2);
+                modL.rotation.x = 0.05 * i; // Inclinazione splay simulata
+                modL.castShadow = true;
+                scene3D.add(modL);
+
+                // Modulo Destro
+                const modR = new THREE.Mesh(boxL208Geo, boxL208Mat);
+                modR.position.set(rightX, modY, stD / 2);
+                modR.rotation.x = 0.05 * i;
+                modR.castShadow = true;
+                scene3D.add(modR);
+            }
+
+            // 5. Subwoofer S118R (Verde)
+            const subGeo = new THREE.BoxGeometry(0.6, 0.7, 0.7);
+            const subMat = new THREE.MeshStandardMaterial({ color: 0x22c55e });
+            const subSpacing = stW / (totalSubs + 1);
+
+            for (let i = 1; i <= totalSubs; i++) {
+                const subX = -stW / 2 + (subSpacing * i);
+                const sub = new THREE.Mesh(subGeo, subMat);
+                sub.position.set(subX, 0.35, stD + 0.5);
+                sub.castShadow = true;
+                scene3D.add(sub);
+            }
+
+            // 6. Pubblico Simulato (Punti Ciano/Gialli)
+            const dotsCount = Math.min(people, 300);
+            const dotGeo = new THREE.SphereGeometry(0.2, 8, 8);
+            const dotMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+
+            for (let i = 0; i < dotsCount; i++) {
+                const pX = (Math.random() - 0.5) * (vWidth - 1);
+                const pZ = stD + 1.5 + Math.random() * (vDepth - stD - 2);
+                const person = new THREE.Mesh(dotGeo, dotMat);
+                person.position.set(pX, 0.8, pZ);
+                scene3D.add(person);
+            }
+
+            // Posiziona Camera 3D
+            camera3D.position.set(vWidth * 1.2, rigHeight * 1.5, vDepth * 1.3);
+            controls3D.target.set(0, rigHeight / 2, stD / 2);
+            controls3D.update();
+        }
+
+        // CONTROLLI MODAL 3D
         function open3DModal() {
             document.getElementById('modal3D').classList.remove('hidden');
-            setTimeout(draw3DPreview, 50); // Piccolo ritardo per permettere al browser di ridimensionare il canvas
+            setTimeout(initThreeJS, 100);
         }
 
         function close3DModal() {
             document.getElementById('modal3D').classList.add('hidden');
+            if (animId3D) cancelAnimationFrame(animId3D);
         }
 
         document.addEventListener('keydown', (e) => {
@@ -632,14 +632,12 @@
             const maxS118R = parseInt(stockSub.value) || 0;
             const maxX10 = parseInt(stockMonitors.value) || 0;
 
-            // 1. Calcoli Venue
             const area = depth * width;
             const density = people / area;
 
             resArea.textContent = `${area.toFixed(0)} m²`;
             resDensity.textContent = `${density.toFixed(1)} pers/m²`;
 
-            // 2. Calcolo Moduli Array L208
             let modulesPerSide = 3;
             if (depth <= 18) modulesPerSide = 3;
             else if (depth > 18 && depth <= 28) modulesPerSide = 4;
@@ -655,7 +653,6 @@
 
             const totalModules = modulesPerSide * 2;
 
-            // 3. Calcolo Sub S118R
             let totalSubs = 2;
             if (depth > 20 || targetSPL >= 102 || people > 600) totalSubs = 4;
             if (depth > 35 || targetSPL >= 106 || people > 1500) totalSubs = 6;
@@ -665,7 +662,6 @@
             if (totalSubs === 4) subText = "4x totali (Linea di Sub o Cardioide 3+1)";
             if (totalSubs > 4) subText = `${totalSubs}x totali (Configurazione in Arco o Cardioide estesa)`;
 
-            // Render Main Array
             resArrayTotalBig.textContent = totalModules;
             resArrayStockMax.textContent = ` / ${maxL208} pronti`;
             resArrayPerSideBig.textContent = `${modulesPerSide} + ${modulesPerSide}`;
@@ -673,7 +669,6 @@
             const usagePercentage = Math.min(100, Math.round((totalModules / Math.max(1, maxL208)) * 100));
             resArrayProgressBar.style.width = `${usagePercentage}%`;
 
-            // 4. Verifiche Carenze Magazzino
             const missingL208 = totalModules - maxL208;
             const missingS118R = totalSubs - maxS118R;
 
@@ -724,7 +719,6 @@
                 stockStatus.innerHTML = `✓ Quantità del tuo magazzino VIO sufficienti per coprire l'evento.`;
             }
 
-            // 5. Frontfill VIO X10
             let frontfillCount = 0;
             if (stW >= 10 && seating !== 'seated') frontfillCount = 2;
             if (stW >= 16) frontfillCount = 4;
@@ -734,7 +728,6 @@
             resMonitorsTotal.textContent = `${frontfillCount}x VIO X10 per Frontfill`;
             resMonitorsAdvice.textContent = `${frontfillCount} usati per Frontfill | ${remainingMonitors} disponibili per Palco`;
 
-            // 6. Rigging & Carichi
             const clusterWeight = modulesPerSide * SPECS.l208.weight;
             const totalWeightPerSide = clusterWeight + SPECS.l208.flybarWeight;
             const clusterLength = (modulesPerSide * SPECS.l208.heightModule) + 0.4;
@@ -744,14 +737,12 @@
             if (totalWeightPerSide > 200 && totalWeightPerSide <= 450) motorSize = "500 kg WLL";
             else if (totalWeightPerSide > 450) motorSize = "1000 kg (1 Ton) WLL";
 
-            // SPL al FOH
             const splAtDistance = (SPECS.l208.maxSPL + (3 * Math.log2(modulesPerSide))) - (10 * Math.log10(depth));
 
             resClusterWeight.textContent = `${clusterWeight.toFixed(1)} kg`;
             resTotalWeight.textContent = `${totalWeightPerSide.toFixed(1)} kg`;
             resMotorAdvice.textContent = `Sospensione consigliata: Motore min. ${motorSize}`;
 
-            // Check Altezza Soffitto
             if (height < minRiggingHeight) {
                 resHeightCheck.className = "text-xs text-red-400 pt-1 border-t border-slate-800 font-bold";
                 resHeightCheck.textContent = `⚠ Soffitto basso (${height}m): Cluster alto ${clusterLength.toFixed(1)}m. Valutare Ground-stacking!`;
@@ -762,7 +753,6 @@
 
             resHeadroom.textContent = `SPL Max teorico al FOH (${depth}m): ~${Math.round(splAtDistance)} dB`;
 
-            // 7. RIEPILOGO FINALE MATERIALE
             summaryL208Count.textContent = `${totalModules} pz`;
             summaryFlybarCount.textContent = `2 pz (DRK-210)`;
             summarySubCount.textContent = `${totalSubs} pz`;
@@ -776,7 +766,6 @@
 
             resSummaryWeightTotal.textContent = `Peso carico: ~${Math.round(totalTruckWeight)} kg`;
 
-            // 8. DISEGNA ANTEPRIMA GRAFICA 2D
             drawVenuePreview(depth, width, stW, stD, people, modulesPerSide, totalSubs, frontfillCount);
         }
 
