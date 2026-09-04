@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dBTechnologies VIO System Sizer</title>
+    <title>dBTechnologies Audio & Rigging Designer - By Santoro Carlo</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -13,7 +13,8 @@
         <!-- Header -->
         <header class="mb-8 border-b border-slate-800 pb-4">
             <h1 class="text-2xl md:text-3xl font-bold text-amber-500">dBTechnologies Audio & Rigging Designer</h1>
-            <p class="text-slate-400 text-sm">Dimensionamento dinamico basato sul magazzino VIO e parametri completi venue</p>
+            <p class="text-slate-300 font-semibold text-base mt-1">By Santoro Carlo</p>
+            <p class="text-slate-400 text-xs mt-1">Dimensionamento dinamico basato sul magazzino VIO e parametri completi venue</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -271,7 +272,7 @@
             resArea.textContent = `${area.toFixed(0)} m²`;
             resDensity.textContent = `${density.toFixed(1)} pers/m²`;
 
-            // 2. Calcolo Moduli Array L208 (Senza limite teorico rigido per mostrare il bisogno reale)
+            // 2. Calcolo Moduli Array L208
             let modulesPerSide = 3;
             if (depth <= 18) modulesPerSide = 3;
             else if (depth > 18 && depth <= 28) modulesPerSide = 4;
@@ -287,7 +288,7 @@
 
             const totalModules = modulesPerSide * 2;
 
-            // 3. Calcolo Sub S118R Fabbisogno Reale
+            // 3. Calcolo Sub S118R
             let totalSubs = 2;
             if (depth > 20 || targetSPL >= 102 || people > 600) totalSubs = 4;
             if (depth > 35 || targetSPL >= 106 || people > 1500) totalSubs = 6;
@@ -312,7 +313,6 @@
             let isArrayDeficit = missingL208 > 0;
             let isSubDeficit = missingS118R > 0;
 
-            // Stile scheda Main Array in caso di deficit
             if (isArrayDeficit) {
                 arrayCardBox.className = "mb-4 bg-red-950/30 p-5 rounded-xl border-2 border-red-600 relative overflow-hidden transition-all duration-300";
                 resArrayTotalBig.className = "text-4xl font-extrabold text-red-500";
@@ -323,7 +323,6 @@
                 resArrayProgressBar.className = "bg-amber-500 h-2.5 rounded-full transition-all duration-300";
             }
 
-            // Stile scheda Sub
             resSubTotal.textContent = `${totalSubs} sub`;
             resSubStockMax.textContent = `/ ${maxS118R} pronti`;
             resSubConfig.textContent = `Configurazione: ${subText}`;
@@ -336,7 +335,6 @@
                 resSubTotal.className = "text-3xl font-extrabold text-amber-500";
             }
 
-            // Messaggio globale Alert / Ok
             if (isArrayDeficit || isSubDeficit) {
                 stockStatus.className = "p-4 rounded-lg bg-red-950/80 border-2 border-red-600 text-red-200 text-sm space-y-2";
                 
