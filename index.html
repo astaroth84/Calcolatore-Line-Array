@@ -543,10 +543,10 @@
                 
                 const legGeo = new THREE.BoxGeometry(0.1, 0.35, 0.1);
                 const legL = new THREE.Mesh(legGeo, clothesMat);
-                legL.position.set(-0.1, 0.2, 0.15);
+                legL.position.set(-0.1, 0.2, -0.15); // Gambe rivolte in avanti verso il palco
                 
                 const legR = new THREE.Mesh(legGeo, clothesMat);
-                legR.position.set(0.1, 0.2, 0.15);
+                legR.position.set(0.1, 0.2, -0.15);
 
                 personGroup.add(legL);
                 personGroup.add(legR);
@@ -567,6 +567,10 @@
 
             personGroup.add(head);
             personGroup.add(torso);
+
+            // RUOTA LA PERSONA DI 180 GRADI PER FARLA GUARDARE VERSO IL PALCO
+            personGroup.rotation.y = Math.PI;
+
             return personGroup;
         }
 
@@ -578,9 +582,10 @@
             const seat = new THREE.Mesh(seatGeo, chairMat);
             seat.position.set(0, 0.4, 0);
 
+            // Schienale posto sul retro della sedia (lontano dal palco)
             const backGeo = new THREE.BoxGeometry(0.45, 0.45, 0.05);
             const back = new THREE.Mesh(backGeo, chairMat);
-            back.position.set(0, 0.65, -0.2);
+            back.position.set(0, 0.65, 0.2);
 
             chairGroup.add(seat);
             chairGroup.add(back);
