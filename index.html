@@ -6,7 +6,7 @@
     <title>dBTechnologies Audio & Rigging Designer - By Santoro Carlo</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Three.js e OrbitControls per la grafica 3D reale -->
+    <!-- Three.js e OrbitControls per la grafica 3D -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
@@ -46,7 +46,7 @@
                 
                 <div class="grid grid-cols-3 gap-3 bg-slate-900/80 p-4 rounded-lg border border-slate-700/50 text-xs">
                     <div>
-                        <span class="text-slate-400 block font-semibold">Line Array Main:</span>
+                        <span class="text-slate-400 block font-semibold">Line Array Main / Fill:</span>
                         <span class="text-sm font-bold text-amber-400">dB VIO L208</span>
                         <span class="text-slate-400 block mt-1">Disponibili: <strong>18 moduli</strong></span>
                         <span class="text-slate-500 block">(18.1 kg / 133.5 dB SPL)</span>
@@ -58,15 +58,24 @@
                         <span class="text-slate-500 block">(47 kg / 139 dB SPL)</span>
                     </div>
                     <div>
-                        <span class="text-slate-400 block font-semibold">Stage Monitor / Fill:</span>
+                        <span class="text-slate-400 block font-semibold">Stage Monitor:</span>
                         <span class="text-sm font-bold text-amber-400">dB VIO X10</span>
                         <span class="text-slate-400 block mt-1">Disponibili: <strong>4 spie</strong></span>
                         <span class="text-slate-500 block">(13.6 kg / 130 dB SPL)</span>
                     </div>
                 </div>
 
-                <!-- PARAMETRI VENUE LIBERI -->
-                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 pt-2">2. Dimensioni Venue e Palco</h2>
+                <!-- SELEZIONE USO SPIE PALCO -->
+                <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700/60">
+                    <label class="block text-xs font-semibold text-amber-400 mb-1">Uso Spie di Palco (dB VIO X10)</label>
+                    <select id="useStageMonitors" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
+                        <option value="yes" selected>Sì - Utilizza spie VIO X10 sul palco</option>
+                        <option value="no">No - Nessuna spia sul palco (In-Ear Monitor o evento non musicale)</option>
+                    </select>
+                </div>
+
+                <!-- PARAMETRI VENUE E PALCO -->
+                <h2 class="text-xl font-semibold text-white border-b border-slate-700 pb-2 pt-2">2. Dimensioni Venue, Palco e Platea</h2>
 
                 <!-- Misure Venue -->
                 <div class="grid grid-cols-3 gap-4">
@@ -84,8 +93,8 @@
                     </div>
                 </div>
 
-                <!-- Misure Palco Personalizzabili -->
-                <div class="grid grid-cols-2 gap-4 bg-slate-900/40 p-3 rounded-lg border border-slate-700/50">
+                <!-- Misure Palco e Posizionamento Platea -->
+                <div class="grid grid-cols-3 gap-3 bg-slate-900/40 p-3 rounded-lg border border-slate-700/50">
                     <div>
                         <label class="block text-xs font-medium text-amber-400 mb-1">Larghezza Palco (m)</label>
                         <input type="number" id="stageWidth" value="12" min="2" max="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
@@ -93,6 +102,10 @@
                     <div>
                         <label class="block text-xs font-medium text-amber-400 mb-1">Profondità Palco (m)</label>
                         <input type="number" id="stageDepth" value="8" min="2" max="30" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-amber-400 mb-1">Distanza Palco-Platea (m)</label>
+                        <input type="number" id="audienceStart" value="2.5" min="0" max="20" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                 </div>
 
@@ -163,7 +176,7 @@
                     <div onclick="open3DModal()" class="mb-4 bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 print-card cursor-pointer hover:border-amber-500/80 transition-all group relative">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
-                                🎨 Layout Venue 2D (Clicca per Similazione 3D Reale) 🔍
+                                🎨 Layout Venue 2D (Clicca per Simulazione 3D) 🔍
                             </span>
                             <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-slate-950 transition-all font-bold">Apri 3D Interattivo</span>
                         </div>
@@ -171,9 +184,8 @@
                             <canvas id="venueCanvas" width="400" height="200" class="max-w-full"></canvas>
                         </div>
                         <div class="flex justify-between text-[9px] text-slate-400 mt-2 px-1 font-mono">
-                            <span>🔴 Main Array</span>
+                            <span>🔴 Main Array / Frontfill L208</span>
                             <span>🟩 Sub S118R</span>
-                            <span>🔵 Frontfill</span>
                             <span>🟨 Pubblico</span>
                         </div>
                     </div>
@@ -184,7 +196,7 @@
                         
                         <div class="flex items-baseline justify-between mb-3 border-b border-amber-500/30 pb-3">
                             <div>
-                                <span class="text-xs text-slate-300 block">FABBISOGNO TEORICO</span>
+                                <span class="text-xs text-slate-300 block">FABBISOGNO SOSPENSIONE</span>
                                 <span id="resArrayTotalBig" class="text-4xl font-extrabold text-amber-400">12</span>
                                 <span id="resArrayStockMax" class="text-sm text-slate-400 font-semibold"> / 18 pronti</span>
                             </div>
@@ -200,6 +212,12 @@
                         </div>
 
                         <div id="resHeadroom" class="text-xs text-emerald-400 font-medium pt-1">SPL Max teorico al FOH: -- dB</div>
+                    </div>
+
+                    <!-- Consigli Frontfill VIO L208 -->
+                    <div id="frontfillAdviceBox" class="mb-4 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                        <div class="text-xs text-amber-400 uppercase tracking-wider font-bold mb-1">Copertura Frontfill (Moduli VIO L208)</div>
+                        <div id="resFrontfillAdvice" class="text-xs text-slate-200">Consigliati: 2x VIO L208 posizionati a terra a fronte palco.</div>
                     </div>
 
                     <!-- Rigging / Weight Details VIO L208 -->
@@ -235,26 +253,29 @@
                         <div id="resSubConfig" class="text-sm text-slate-400 mt-1">Configurazione: Cardioide o L/R</div>
                     </div>
 
-                    <!-- Frontfill / Stage Monitor VIO X10 -->
-                    <div class="mb-6 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Frontfill / Utility: dB VIO X10</div>
-                        <div id="resMonitorsTotal" class="text-xl font-bold text-slate-200">2x Frontfill</div>
-                        <div id="resMonitorsAdvice" class="text-xs text-slate-400 mt-1">2 usati per Frontfill | 2 per Spie</div>
+                    <!-- Stage Monitor VIO X10 -->
+                    <div class="mb-6 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50" id="stageMonCardBox">
+                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Spie Palco: dB VIO X10</div>
+                        <div id="resMonitorsTotal" class="text-xl font-bold text-slate-200">4x Spie VIO X10</div>
                     </div>
 
-                    <!-- RIEPILOGO FINALE MATERIALE (PICKUP LIST) -->
+                    <!-- RIEPILOGO FINALE MATERIALE DA USARE (PICKUP LIST) -->
                     <div class="mb-6 bg-amber-500/10 p-5 rounded-xl border-2 border-amber-500/60 space-y-3 print-card">
                         <div class="flex justify-between items-center border-b border-amber-500/40 pb-2">
                             <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                                📋 RIEPILOGO LISTA MATERIALE (PICKUP LIST)
+                                📋 RIEPILOGO LISTA MATERIALE DA USARE
                             </h3>
                             <span class="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-mono" id="resSummaryWeightTotal">0 kg tot</span>
                         </div>
                         
                         <div class="space-y-1.5 text-xs text-slate-200 font-mono">
                             <div class="flex justify-between border-b border-slate-800/80 pb-1">
-                                <span>• Moduli Main Array dB VIO L208:</span>
+                                <span>• Moduli Main Array dB VIO L208 (Sospesi):</span>
                                 <strong id="summaryL208Count" class="text-amber-400 text-sm">12 pz</strong>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                                <span>• Moduli Frontfill dB VIO L208 (A terra):</span>
+                                <strong id="summaryL208FFCount" class="text-amber-400 text-sm">2 pz</strong>
                             </div>
                             <div class="flex justify-between border-b border-slate-800/80 pb-1">
                                 <span>• Flybar / Telai DRK-210:</span>
@@ -264,13 +285,9 @@
                                 <span>• Subwoofer dB VIO S118R:</span>
                                 <strong id="summarySubCount" class="text-amber-400 text-sm">4 pz</strong>
                             </div>
-                            <div class="flex justify-between border-b border-slate-800/80 pb-1">
-                                <span>• Frontfill / Diffusori dB VIO X10:</span>
-                                <strong id="summaryX10Count" class="text-amber-400 text-sm">2 pz</strong>
-                            </div>
-                            <div class="flex justify-between border-b border-slate-800/80 pb-1">
-                                <span>• Spie Palco Rimanenti dB VIO X10:</span>
-                                <strong id="summaryStageMonCount" class="text-amber-400 text-sm">2 pz</strong>
+                            <div class="flex justify-between border-b border-slate-800/80 pb-1" id="summaryMonRow">
+                                <span>• Spie Palco dB VIO X10:</span>
+                                <strong id="summaryX10Count" class="text-amber-400 text-sm">4 pz</strong>
                             </div>
                         </div>
                     </div>
@@ -294,7 +311,7 @@
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
             <div>
                 <h2 class="text-lg md:text-xl font-bold text-amber-500">Simulazione 3D Reale Interattiva - dBTechnologies VIO</h2>
-                <p class="text-xs text-slate-400">Trascina con il mouse/touch per RUOTARE | Rotellina mouse per ZOOM | Tasto Destro per SPOSTARE</p>
+                <p class="text-xs text-slate-400">Trascina per RUOTARE | Zoom con rotellina | Tasto destro per SPOSTARE</p>
             </div>
             <button onclick="close3DModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2 px-4 rounded-lg transition-all cursor-pointer">
                 ✕ Chiudi Vista 3D
@@ -302,14 +319,15 @@
         </div>
 
         <div id="container3D" class="flex-1 w-full h-full rounded-xl border border-slate-800 shadow-2xl overflow-hidden relative my-2 bg-slate-950">
-            <!-- Il Canvas Three.js viene iniettato qui -->
+            <!-- Canvas Three.js -->
         </div>
 
         <div class="flex justify-center flex-wrap gap-4 text-xs text-slate-400 font-mono border-t border-slate-800 pt-3">
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-500 rounded-sm"></span> Main Cluster VIO L208</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-amber-600 rounded-sm"></span> Frontfill VIO L208</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-500 rounded-sm"></span> Subwoofer VIO S118R</span>
-            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span> Frontfill VIO X10</span>
-            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-700 rounded-sm"></span> Palco Personalizzato</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-700 rounded-sm"></span> Palco</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-amber-500 rounded-sm"></span> Pubblico 3D</span>
         </div>
     </div>
 
@@ -322,11 +340,13 @@
         };
 
         // DOM Elements Input
+        const useStageMonitors = document.getElementById('useStageMonitors');
         const venueDepth = document.getElementById('venueDepth');
         const venueWidth = document.getElementById('venueWidth');
         const venueHeight = document.getElementById('venueHeight');
         const stageWidth = document.getElementById('stageWidth');
         const stageDepth = document.getElementById('stageDepth');
+        const audienceStart = document.getElementById('audienceStart');
         const peopleCount = document.getElementById('peopleCount');
         const seatingType = document.getElementById('seatingType');
         const eventType = document.getElementById('eventType');
@@ -341,18 +361,20 @@
         
         const arrayCardBox = document.getElementById('arrayCardBox');
         const subCardBox = document.getElementById('subCardBox');
+        const stageMonCardBox = document.getElementById('stageMonCardBox');
 
         const resArrayTotalBig = document.getElementById('resArrayTotalBig');
         const resArrayStockMax = document.getElementById('resArrayStockMax');
         const resArrayPerSideBig = document.getElementById('resArrayPerSideBig');
         const resArrayProgressBar = document.getElementById('resArrayProgressBar');
 
+        const resFrontfillAdvice = document.getElementById('resFrontfillAdvice');
+
         const resSubTotal = document.getElementById('resSubTotal');
         const resSubStockMax = document.getElementById('resSubStockMax');
         const resSubConfig = document.getElementById('resSubConfig');
         
         const resMonitorsTotal = document.getElementById('resMonitorsTotal');
-        const resMonitorsAdvice = document.getElementById('resMonitorsAdvice');
         const resHeadroom = document.getElementById('resHeadroom');
         const resClusterWeight = document.getElementById('resClusterWeight');
         const resTotalWeight = document.getElementById('resTotalWeight');
@@ -362,14 +384,15 @@
 
         // DOM Elements Summary
         const summaryL208Count = document.getElementById('summaryL208Count');
+        const summaryL208FFCount = document.getElementById('summaryL208FFCount');
         const summaryFlybarCount = document.getElementById('summaryFlybarCount');
         const summarySubCount = document.getElementById('summarySubCount');
         const summaryX10Count = document.getElementById('summaryX10Count');
-        const summaryStageMonCount = document.getElementById('summaryStageMonCount');
+        const summaryMonRow = document.getElementById('summaryMonRow');
         const resSummaryWeightTotal = document.getElementById('resSummaryWeightTotal');
 
-        // 1. ANTEPRIMA GRAFICA 2D CANTONE
-        function drawVenuePreview(depth, width, stW, stD, people, modulesPerSide, totalSubs, frontfillCount) {
+        // 1. ANTEPRIMA GRAFICA 2D
+        function drawVenuePreview(depth, width, stW, stD, audStart, people, modulesPerSide, totalSubs, ffModulesCount) {
             const canvas = document.getElementById('venueCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -412,22 +435,32 @@
             ctx.textAlign = "center";
             ctx.fillText(`PALCO (${stW}x${stD}m)`, stageX + stageW / 2, stageY + stageH / 2 + 3);
 
-            ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
-            const dots = Math.min(Math.floor(people / 25), 60);
-            for (let i = 0; i < dots; i++) {
-                const px = startX + 5 + Math.random() * (drawW - 10);
-                const py = stageY + stageH + 10 + Math.random() * (drawH - stageH - 15);
-                ctx.beginPath();
-                ctx.arc(px, py, 1.2, 0, Math.PI * 2);
-                ctx.fill();
+            const audStartY = stageY + stageH + (audStart * scale);
+            const audHeight = (startY + drawH) - audStartY - 5;
+
+            if (audHeight > 5) {
+                ctx.fillStyle = "rgba(245, 158, 11, 0.12)";
+                ctx.fillRect(startX + 4, audStartY, drawW - 8, audHeight);
+
+                ctx.fillStyle = "rgba(245, 158, 11, 0.4)";
+                const dots = Math.min(Math.floor(people / 25), 60);
+                for (let i = 0; i < dots; i++) {
+                    const px = startX + 6 + Math.random() * (drawW - 12);
+                    const py = audStartY + 5 + Math.random() * (audHeight - 10);
+                    ctx.beginPath();
+                    ctx.arc(px, py, 1.2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
 
+            // Main Array L208 Sospesi (Rosso)
             const arrW = 6;
             const arrH = Math.min(14, 4 + modulesPerSide * 0.8);
             ctx.fillStyle = "#ef4444";
             ctx.fillRect(stageX - 8, stageY + 2, arrW, arrH);
             ctx.fillRect(stageX + stageW + 2, stageY + 2, arrW, arrH);
 
+            // Sub S118R (Verdi)
             ctx.fillStyle = "#22c55e";
             const subW = 7;
             const subH = 4;
@@ -436,13 +469,12 @@
                 ctx.fillRect(stageX + (subSpacing * i) - (subW / 2), stageY + stageH + 1, subW, subH);
             }
 
-            if (frontfillCount > 0) {
-                ctx.fillStyle = "#3b82f6";
-                const ffSpacing = stageW / (frontfillCount + 1);
-                for (let i = 1; i <= frontfillCount; i++) {
-                    ctx.beginPath();
-                    ctx.arc(stageX + (ffSpacing * i), stageY + stageH - 1, 2, 0, Math.PI * 2);
-                    ctx.fill();
+            // Frontfill VIO L208 (Arancione)
+            if (ffModulesCount > 0) {
+                ctx.fillStyle = "#d97706";
+                const ffSpacing = stageW / (ffModulesCount + 1);
+                for (let i = 1; i <= ffModulesCount; i++) {
+                    ctx.fillRect(stageX + (ffSpacing * i) - 3, stageY + stageH - 1, 6, 3);
                 }
             }
         }
@@ -452,30 +484,25 @@
 
         function initThreeJS() {
             const container = document.getElementById('container3D');
-            container.innerHTML = ""; // Pulisci container
+            container.innerHTML = "";
 
             const width = container.clientWidth || 800;
             const height = container.clientHeight || 500;
 
-            // Scena
             scene3D = new THREE.Scene();
             scene3D.background = new THREE.Color(0x020617);
 
-            // Camera
             camera3D = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
 
-            // Renderer
             renderer3D = new THREE.WebGLRenderer({ antialias: true });
             renderer3D.setSize(width, height);
             renderer3D.shadowMap.enabled = true;
             container.appendChild(renderer3D.domElement);
 
-            // Orbit Controls
             controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
             controls3D.enableDamping = true;
             controls3D.dampingFactor = 0.05;
 
-            // Luci
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene3D.add(ambientLight);
 
@@ -484,16 +511,75 @@
             dirLight.castShadow = true;
             scene3D.add(dirLight);
 
-            // COSTRUZIONE SCENA 3D IN BASE AI DATI
             build3DScene();
 
-            // Loop Animazione
             function animate() {
                 animId3D = requestAnimationFrame(animate);
                 controls3D.update();
                 renderer3D.render(scene3D, camera3D);
             }
             animate();
+        }
+
+        function create3DPerson(isSeated = false) {
+            const personGroup = new THREE.Group();
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xf3a683 });
+            const clothesMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
+
+            const headGeo = new THREE.SphereGeometry(0.12, 8, 8);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            
+            const torsoGeo = new THREE.BoxGeometry(0.35, 0.5, 0.2);
+            const torso = new THREE.Mesh(torsoGeo, clothesMat);
+
+            if (isSeated) {
+                head.position.set(0, 0.85, 0);
+                torso.position.set(0, 0.5, 0);
+                
+                const legGeo = new THREE.BoxGeometry(0.1, 0.35, 0.1);
+                const legL = new THREE.Mesh(legGeo, clothesMat);
+                legL.position.set(-0.1, 0.2, 0.15);
+                
+                const legR = new THREE.Mesh(legGeo, clothesMat);
+                legR.position.set(0.1, 0.2, 0.15);
+
+                personGroup.add(legL);
+                personGroup.add(legR);
+            } else {
+                head.position.set(0, 1.5, 0);
+                torso.position.set(0, 1.05, 0);
+
+                const legGeo = new THREE.BoxGeometry(0.12, 0.7, 0.12);
+                const legL = new THREE.Mesh(legGeo, clothesMat);
+                legL.position.set(-0.1, 0.45, 0);
+
+                const legR = new THREE.Mesh(legGeo, clothesMat);
+                legR.position.set(0.1, 0.45, 0);
+
+                personGroup.add(legL);
+                personGroup.add(legR);
+            }
+
+            personGroup.add(head);
+            personGroup.add(torso);
+            return personGroup;
+        }
+
+        function create3DChair() {
+            const chairGroup = new THREE.Group();
+            const chairMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+
+            const seatGeo = new THREE.BoxGeometry(0.45, 0.05, 0.45);
+            const seat = new THREE.Mesh(seatGeo, chairMat);
+            seat.position.set(0, 0.4, 0);
+
+            const backGeo = new THREE.BoxGeometry(0.45, 0.45, 0.05);
+            const back = new THREE.Mesh(backGeo, chairMat);
+            back.position.set(0, 0.65, -0.2);
+
+            chairGroup.add(seat);
+            chairGroup.add(back);
+            return chairGroup;
         }
 
         function build3DScene() {
@@ -504,7 +590,9 @@
             const vHeight = parseFloat(venueHeight.value) || 7;
             const stW = parseFloat(stageWidth.value) || 12;
             const stD = parseFloat(stageDepth.value) || 8;
+            const audStart = parseFloat(audienceStart.value) || 2.5;
             const people = parseInt(peopleCount.value) || 1200;
+            const seating = seatingType.value;
 
             let modulesPerSide = 6;
             if (vDepth <= 18) modulesPerSide = 3;
@@ -515,7 +603,9 @@
             let totalSubs = 4;
             if (vDepth > 35) totalSubs = 6;
 
-            // 1. Pavimento Venue
+            let ffModulesCount = (stW >= 10) ? 2 : 0;
+
+            // Pavimento
             const floorGeo = new THREE.PlaneGeometry(vWidth, vDepth);
             const floorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -524,12 +614,11 @@
             floor.receiveShadow = true;
             scene3D.add(floor);
 
-            // Griglia Pavimento
             const grid = new THREE.GridHelper(Math.max(vWidth, vDepth), 20, 0xf59e0b, 0x334155);
             grid.position.set(0, 0.01, vDepth / 2);
             scene3D.add(grid);
 
-            // 2. Palco 3D
+            // Palco
             const stageGeo = new THREE.BoxGeometry(stW, 1.2, stD);
             const stageMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
             const stage = new THREE.Mesh(stageGeo, stageMat);
@@ -538,7 +627,7 @@
             stage.receiveShadow = true;
             scene3D.add(stage);
 
-            // 3. Struttura Americana / Truss di Sospensione
+            // Truss Sospensione
             const trussGeo = new THREE.BoxGeometry(stW + 3, 0.4, 0.4);
             const trussMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
             const truss = new THREE.Mesh(trussGeo, trussMat);
@@ -546,7 +635,7 @@
             truss.position.set(0, rigHeight, stD / 2);
             scene3D.add(truss);
 
-            // 4. Moduli Array VIO L208 (Rosso)
+            // Moduli Array VIO L208 Sospesi
             const boxL208Geo = new THREE.BoxGeometry(0.7, SPECS.l208.heightModule, 0.4);
             const boxL208Mat = new THREE.MeshStandardMaterial({ color: 0xef4444 });
 
@@ -556,14 +645,12 @@
             for (let i = 0; i < modulesPerSide; i++) {
                 const modY = rigHeight - 0.4 - (i * (SPECS.l208.heightModule + 0.05));
                 
-                // Modulo Sinistro
                 const modL = new THREE.Mesh(boxL208Geo, boxL208Mat);
                 modL.position.set(leftX, modY, stD / 2);
-                modL.rotation.x = 0.05 * i; // Inclinazione splay simulata
+                modL.rotation.x = 0.05 * i;
                 modL.castShadow = true;
                 scene3D.add(modL);
 
-                // Modulo Destro
                 const modR = new THREE.Mesh(boxL208Geo, boxL208Mat);
                 modR.position.set(rightX, modY, stD / 2);
                 modR.rotation.x = 0.05 * i;
@@ -571,7 +658,21 @@
                 scene3D.add(modR);
             }
 
-            // 5. Subwoofer S118R (Verde)
+            // Frontfill VIO L208 A Terra (Colore Arancione/Ambra)
+            if (ffModulesCount > 0) {
+                const ffMat = new THREE.MeshStandardMaterial({ color: 0xd97706 });
+                const ffSpacing = stW / (ffModulesCount + 1);
+
+                for (let i = 1; i <= ffModulesCount; i++) {
+                    const ffX = -stW / 2 + (ffSpacing * i);
+                    const ffMod = new THREE.Mesh(boxL208Geo, ffMat);
+                    ffMod.position.set(ffX, 1.35, stD - 0.2); // Appoggiati sul fronte palco
+                    ffMod.castShadow = true;
+                    scene3D.add(ffMod);
+                }
+            }
+
+            // Subwoofer S118R
             const subGeo = new THREE.BoxGeometry(0.6, 0.7, 0.7);
             const subMat = new THREE.MeshStandardMaterial({ color: 0x22c55e });
             const subSpacing = stW / (totalSubs + 1);
@@ -584,26 +685,52 @@
                 scene3D.add(sub);
             }
 
-            // 6. Pubblico Simulato (Punti Ciano/Gialli)
-            const dotsCount = Math.min(people, 300);
-            const dotGeo = new THREE.SphereGeometry(0.2, 8, 8);
-            const dotMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+            // Pubblico 3D
+            const audienceZStart = stD + audStart;
+            const audienceZEnd = vDepth - 1;
+            const audienceDepthArea = audienceZEnd - audienceZStart;
 
-            for (let i = 0; i < dotsCount; i++) {
-                const pX = (Math.random() - 0.5) * (vWidth - 1);
-                const pZ = stD + 1.5 + Math.random() * (vDepth - stD - 2);
-                const person = new THREE.Mesh(dotGeo, dotMat);
-                person.position.set(pX, 0.8, pZ);
-                scene3D.add(person);
+            if (audienceDepthArea > 1) {
+                const count = Math.min(people, 180);
+
+                for (let i = 0; i < count; i++) {
+                    const pX = (Math.random() - 0.5) * (vWidth - 2);
+                    const pZ = audienceZStart + Math.random() * audienceDepthArea;
+
+                    let shouldBeSeated = false;
+                    let heightOffsetY = 0;
+
+                    if (seating === 'seated') {
+                        shouldBeSeated = true;
+                    } else if (seating === 'mixed') {
+                        shouldBeSeated = (pZ > audienceZStart + (audienceDepthArea * 0.4));
+                    } else if (seating === 'tribune') {
+                        shouldBeSeated = true;
+                        const distFromStart = (pZ - audienceZStart) / audienceDepthArea;
+                        heightOffsetY = distFromStart * 3.0;
+                    }
+
+                    if (shouldBeSeated) {
+                        const chair = create3DChair();
+                        chair.position.set(pX, heightOffsetY, pZ);
+                        scene3D.add(chair);
+
+                        const person = create3DPerson(true);
+                        person.position.set(pX, heightOffsetY, pZ);
+                        scene3D.add(person);
+                    } else {
+                        const person = create3DPerson(false);
+                        person.position.set(pX, heightOffsetY, pZ);
+                        scene3D.add(person);
+                    }
+                }
             }
 
-            // Posiziona Camera 3D
             camera3D.position.set(vWidth * 1.2, rigHeight * 1.5, vDepth * 1.3);
             controls3D.target.set(0, rigHeight / 2, stD / 2);
             controls3D.update();
         }
 
-        // CONTROLLI MODAL 3D
         function open3DModal() {
             document.getElementById('modal3D').classList.remove('hidden');
             setTimeout(initThreeJS, 100);
@@ -619,11 +746,13 @@
         });
 
         function calculateSystem() {
+            const useMonitors = useStageMonitors.value === 'yes';
             const depth = parseFloat(venueDepth.value) || 10;
             const width = parseFloat(venueWidth.value) || 10;
             const height = parseFloat(venueHeight.value) || 5;
             const stW = parseFloat(stageWidth.value) || 10;
             const stD = parseFloat(stageDepth.value) || 6;
+            const audStart = parseFloat(audienceStart.value) || 2.5;
             const people = parseInt(peopleCount.value) || 100;
             const seating = seatingType.value;
             const targetSPL = parseInt(eventType.value);
@@ -638,6 +767,7 @@
             resArea.textContent = `${area.toFixed(0)} m²`;
             resDensity.textContent = `${density.toFixed(1)} pers/m²`;
 
+            // 1. Calcolo Moduli Sospesi per Main Array L208
             let modulesPerSide = 3;
             if (depth <= 18) modulesPerSide = 3;
             else if (depth > 18 && depth <= 28) modulesPerSide = 4;
@@ -651,8 +781,20 @@
                 modulesPerSide += 2;
             }
 
-            const totalModules = modulesPerSide * 2;
+            const mainArrayModules = modulesPerSide * 2;
 
+            // 2. Calcolo Frontfill gestito da VIO L208
+            let frontfillL208Modules = 0;
+            if (stW >= 10 || width >= 14) {
+                frontfillL208Modules = 2; // 2 moduli L208 a terra per coprire le prime file centrali
+                resFrontfillAdvice.textContent = `Consigliati: 2x VIO L208 a terra sul fronte palco per prime file centrali.`;
+            } else {
+                resFrontfillAdvice.textContent = `Non strettamente necessari con larghezza palco < 10m. Copertura Main sufficiente.`;
+            }
+
+            const totalL208Required = mainArrayModules + frontfillL208Modules;
+
+            // 3. Calcolo Sub S118R
             let totalSubs = 2;
             if (depth > 20 || targetSPL >= 102 || people > 600) totalSubs = 4;
             if (depth > 35 || targetSPL >= 106 || people > 1500) totalSubs = 6;
@@ -662,14 +804,15 @@
             if (totalSubs === 4) subText = "4x totali (Linea di Sub o Cardioide 3+1)";
             if (totalSubs > 4) subText = `${totalSubs}x totali (Configurazione in Arco o Cardioide estesa)`;
 
-            resArrayTotalBig.textContent = totalModules;
+            // Render Main Array
+            resArrayTotalBig.textContent = mainArrayModules;
             resArrayStockMax.textContent = ` / ${maxL208} pronti`;
             resArrayPerSideBig.textContent = `${modulesPerSide} + ${modulesPerSide}`;
 
-            const usagePercentage = Math.min(100, Math.round((totalModules / Math.max(1, maxL208)) * 100));
+            const usagePercentage = Math.min(100, Math.round((totalL208Required / Math.max(1, maxL208)) * 100));
             resArrayProgressBar.style.width = `${usagePercentage}%`;
 
-            const missingL208 = totalModules - maxL208;
+            const missingL208 = totalL208Required - maxL208;
             const missingS118R = totalSubs - maxS118R;
 
             let isArrayDeficit = missingL208 > 0;
@@ -701,17 +844,16 @@
                 stockStatus.className = "p-4 rounded-lg bg-red-950/80 border-2 border-red-600 text-red-200 text-sm space-y-2";
                 
                 let alertHTML = `<div class="font-bold text-red-400 text-base">⚠ ATTENZIONE: MATERIALE INSUFFICIENTE PER QUESTA VENUE!</div>`;
-                alertHTML += `<div class="text-xs text-slate-200">Il tuo magazzino VIO non è sufficiente per garantire la copertura o la pressione acustica richiesta.</div>`;
+                alertHTML += `<div class="text-xs text-slate-200">Il tuo magazzino VIO non è sufficiente per coprire l'evento.</div>`;
                 alertHTML += `<div class="bg-red-900/40 p-2.5 rounded border border-red-700/50 text-xs font-mono mt-2 space-y-1">`;
                 
                 if (isArrayDeficit) {
-                    alertHTML += `<div>• <strong>VIO L208:</strong> Servono <strong>+${missingL208} moduli</strong> (${modulesPerSide} per lato anziché ${Math.floor(maxL208/2)}).</div>`;
+                    alertHTML += `<div>• <strong>VIO L208:</strong> Servono <strong>+${missingL208} moduli</strong> (${mainArrayModules} sospesi + ${frontfillL208Modules} frontfill = ${totalL208Required} anziché ${maxL208}).</div>`;
                 }
                 if (isSubDeficit) {
                     alertHTML += `<div>• <strong>VIO S118R:</strong> Servono <strong>+${missingS118R} sub</strong> (Totale ${totalSubs} anziché ${maxS118R}).</div>`;
                 }
                 alertHTML += `</div>`;
-                alertHTML += `<div class="text-xs text-amber-300 font-sans italic pt-1">💡 Valutare il noleggio dei moduli mancanti o aggiungere dei sistemi di Delay (linea di ritardo).</div>`;
 
                 stockStatus.innerHTML = alertHTML;
             } else {
@@ -719,14 +861,17 @@
                 stockStatus.innerHTML = `✓ Quantità del tuo magazzino VIO sufficienti per coprire l'evento.`;
             }
 
-            let frontfillCount = 0;
-            if (stW >= 10 && seating !== 'seated') frontfillCount = 2;
-            if (stW >= 16) frontfillCount = 4;
-            if (frontfillCount > maxX10) frontfillCount = maxX10;
-
-            const remainingMonitors = maxX10 - frontfillCount;
-            resMonitorsTotal.textContent = `${frontfillCount}x VIO X10 per Frontfill`;
-            resMonitorsAdvice.textContent = `${frontfillCount} usati per Frontfill | ${remainingMonitors} disponibili per Palco`;
+            // Gestione Spie Palco (VIO X10)
+            if (useMonitors) {
+                stageMonCardBox.classList.remove('hidden');
+                summaryMonRow.classList.remove('hidden');
+                resMonitorsTotal.textContent = `${maxX10}x Spie VIO X10 sul Palco`;
+                summaryX10Count.textContent = `${maxX10} pz`;
+            } else {
+                stageMonCardBox.classList.add('hidden');
+                summaryMonRow.classList.add('hidden');
+                summaryX10Count.textContent = `0 pz`;
+            }
 
             const clusterWeight = modulesPerSide * SPECS.l208.weight;
             const totalWeightPerSide = clusterWeight + SPECS.l208.flybarWeight;
@@ -753,24 +898,26 @@
 
             resHeadroom.textContent = `SPL Max teorico al FOH (${depth}m): ~${Math.round(splAtDistance)} dB`;
 
-            summaryL208Count.textContent = `${totalModules} pz`;
+            // RIEPILOGO FINALE MATERIALE DA USARE
+            summaryL208Count.textContent = `${mainArrayModules} pz`;
+            summaryL208FFCount.textContent = `${frontfillL208Modules} pz`;
             summaryFlybarCount.textContent = `2 pz (DRK-210)`;
             summarySubCount.textContent = `${totalSubs} pz`;
-            summaryX10Count.textContent = `${frontfillCount} pz`;
-            summaryStageMonCount.textContent = `${remainingMonitors} pz`;
 
-            const totalTruckWeight = (totalModules * SPECS.l208.weight) + 
+            const usedX10Count = useMonitors ? maxX10 : 0;
+
+            const totalTruckWeight = (totalL208Required * SPECS.l208.weight) + 
                                      (2 * SPECS.l208.flybarWeight) + 
                                      (totalSubs * SPECS.s118r.weight) + 
-                                     (maxX10 * SPECS.x10.weight);
+                                     (usedX10Count * SPECS.x10.weight);
 
             resSummaryWeightTotal.textContent = `Peso carico: ~${Math.round(totalTruckWeight)} kg`;
 
-            drawVenuePreview(depth, width, stW, stD, people, modulesPerSide, totalSubs, frontfillCount);
+            drawVenuePreview(depth, width, stW, stD, audStart, people, modulesPerSide, totalSubs, frontfillL208Modules);
         }
 
         // Listeners
-        [venueDepth, venueWidth, venueHeight, stageWidth, stageDepth, peopleCount, seatingType, eventType, stockArray, stockSub, stockMonitors].forEach(el => {
+        [useStageMonitors, venueDepth, venueWidth, venueHeight, stageWidth, stageDepth, audienceStart, peopleCount, seatingType, eventType, stockArray, stockSub, stockMonitors].forEach(el => {
             el.addEventListener('input', calculateSystem);
             el.addEventListener('change', calculateSystem);
         });
