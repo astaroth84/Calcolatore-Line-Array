@@ -94,18 +94,22 @@
                 </div>
 
                 <!-- Misure Palco e Posizionamento Platea -->
-                <div class="grid grid-cols-3 gap-3 bg-slate-900/40 p-3 rounded-lg border border-slate-700/50">
+                <div class="grid grid-cols-4 gap-2 bg-slate-900/40 p-3 rounded-lg border border-slate-700/50">
                     <div>
                         <label class="block text-xs font-medium text-amber-400 mb-1">Larghezza Palco (m)</label>
-                        <input type="number" id="stageWidth" value="12" min="2" max="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <input type="number" id="stageWidth" value="12" min="2" max="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-amber-400 mb-1">Profondità Palco (m)</label>
-                        <input type="number" id="stageDepth" value="8" min="2" max="30" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <input type="number" id="stageDepth" value="8" min="2" max="30" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-amber-400 mb-1">Distanza Palco-Platea (m)</label>
-                        <input type="number" id="audienceStart" value="2.5" min="0" max="20" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <label class="block text-xs font-medium text-amber-400 mb-1">Altezza Palco (m)</label>
+                        <input type="number" id="stageHeight" value="1.2" min="0.2" max="5" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-amber-400 mb-1">Dist. Palco-Platea (m)</label>
+                        <input type="number" id="audienceStart" value="2.5" min="0" max="20" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
                     </div>
                 </div>
 
@@ -346,6 +350,7 @@
         const venueHeight = document.getElementById('venueHeight');
         const stageWidth = document.getElementById('stageWidth');
         const stageDepth = document.getElementById('stageDepth');
+        const stageHeight = document.getElementById('stageHeight');
         const audienceStart = document.getElementById('audienceStart');
         const peopleCount = document.getElementById('peopleCount');
         const seatingType = document.getElementById('seatingType');
@@ -590,6 +595,7 @@
             const vHeight = parseFloat(venueHeight.value) || 7;
             const stW = parseFloat(stageWidth.value) || 12;
             const stD = parseFloat(stageDepth.value) || 8;
+            const stH = parseFloat(stageHeight.value) || 1.2;
             const audStart = parseFloat(audienceStart.value) || 2.5;
             const people = parseInt(peopleCount.value) || 1200;
             const seating = seatingType.value;
@@ -618,11 +624,11 @@
             grid.position.set(0, 0.01, vDepth / 2);
             scene3D.add(grid);
 
-            // Palco
-            const stageGeo = new THREE.BoxGeometry(stW, 1.2, stD);
+            // Palco (Usa Altezza Personalizzata)
+            const stageGeo = new THREE.BoxGeometry(stW, stH, stD);
             const stageMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
             const stage = new THREE.Mesh(stageGeo, stageMat);
-            stage.position.set(0, 0.6, stD / 2);
+            stage.position.set(0, stH / 2, stD / 2);
             stage.castShadow = true;
             stage.receiveShadow = true;
             scene3D.add(stage);
@@ -658,7 +664,7 @@
                 scene3D.add(modR);
             }
 
-            // Frontfill VIO L208 A Terra (Colore Arancione/Ambra)
+            // Frontfill VIO L208 A Terra (Poggiati sul fronte del palco ad altezza stH)
             if (ffModulesCount > 0) {
                 const ffMat = new THREE.MeshStandardMaterial({ color: 0xd97706 });
                 const ffSpacing = stW / (ffModulesCount + 1);
@@ -666,7 +672,7 @@
                 for (let i = 1; i <= ffModulesCount; i++) {
                     const ffX = -stW / 2 + (ffSpacing * i);
                     const ffMod = new THREE.Mesh(boxL208Geo, ffMat);
-                    ffMod.position.set(ffX, 1.35, stD - 0.2); // Appoggiati sul fronte palco
+                    ffMod.position.set(ffX, stH + (SPECS.l208.heightModule / 2), stD - 0.2);
                     ffMod.castShadow = true;
                     scene3D.add(ffMod);
                 }
@@ -786,7 +792,7 @@
             // 2. Calcolo Frontfill gestito da VIO L208
             let frontfillL208Modules = 0;
             if (stW >= 10 || width >= 14) {
-                frontfillL208Modules = 2; // 2 moduli L208 a terra per coprire le prime file centrali
+                frontfillL208Modules = 2;
                 resFrontfillAdvice.textContent = `Consigliati: 2x VIO L208 a terra sul fronte palco per prime file centrali.`;
             } else {
                 resFrontfillAdvice.textContent = `Non strettamente necessari con larghezza palco < 10m. Copertura Main sufficiente.`;
@@ -917,7 +923,7 @@
         }
 
         // Listeners
-        [useStageMonitors, venueDepth, venueWidth, venueHeight, stageWidth, stageDepth, audienceStart, peopleCount, seatingType, eventType, stockArray, stockSub, stockMonitors].forEach(el => {
+        [useStageMonitors, venueDepth, venueWidth, venueHeight, stageWidth, stageDepth, stageHeight, audienceStart, peopleCount, seatingType, eventType, stockArray, stockSub, stockMonitors].forEach(el => {
             el.addEventListener('input', calculateSystem);
             el.addEventListener('change', calculateSystem);
         });
